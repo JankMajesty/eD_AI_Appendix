@@ -1,0 +1,49 @@
+Last semester
+
+Good job overall
+
+Not enough prompts
+
+Multiple imputation instead of imputing the median
+
+Sales price has strong outliers that should be removed many mansions, can’t predict much from mansions because most don’t live in them
+
+Sales price and living area have strong correlation at the low end
+
+Sales price and overall quality have a nonlinear relationship, so overall quality should be represented by a log transformation
+
+Year built has a heteroscedastic relationship with sales price, suggesting experimentation with a log transformation 
+
+Reasons for including variable! (But were these inspired by expertise or llm)
+
+Asking for explanation of diagnostic plots was probably  important
+
+Pairwise correlations are variable but can miss important relationships; for example folklore suggests that location is the most important factor in house prices and location has a mediating effect on other variables like area, quality, and frontage
+
+Problem of not understanding what the graphics are showing
+
+If you didn’t know much about data visualization, you should have asked the llm to explain the graphics and suggest linear modeling techniques to respond to the graphics
+
+The alms didn’t give you correct answers on some R technicalities. No one ask for clarification on these, so I have to assume you thought the llm was right; yet another reminder that the llm is not a substitute for human expertise
+
+JP did the most documentation of interaction with the llm, which I appreciated but the llm didn’t always give the right answer, so I’m tempted to upload JP’s work to show what you can do but not to show what the llm can do
+
+Some people, like Siddarth, came up with good ways to delineate the prompts, e.d. by putting them in italics and separate paragraphs. Was helpful for review
+
+There could have been more comparison R^2 values but if you didn’t know about statistics, the llm should have told you but evidently didn’t
+
+Some students knew appeared to know a lot of statistics or data science in general, so I’m not sure how much the llamas contributed to their work
+Some prompted resulted in very very long snippets of code. I would break those up into smaller chunks and ask the llm to explain them in more detail
+
+Using “Prompt” “Result” headings is helpful
+
+Not sure if everyone understands the point of using Quarto as making it possible to include R or Python or Julia code in the document
+
+Mentioned that the histogram of the residuals is not useful. That is because the QQ plot is a better indicator of normality. Some people generated the histogram of residuals anyway, but I’m not sure what you got out of them
+
+The best models had an R^2 value of 80 to 90 percent. With about five variables, you could get to about 80 and with about a dozen variables, you could get to about 90. Of course, not everyone displayed a summary of their best model, so it would be necessary to run those models again and display the summary to get the R^2 value. I probably should have asked for the R^2 value of the best model in the specification.
+
+
+Calculating log of sales price can find a more accurate median
+
+Lasso or best subset selection are great techniques

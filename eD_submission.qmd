@@ -1,0 +1,323 @@
+---
+title: "Ames Housing Dataset Regression Analysis"
+author: "Lucas McGill"
+date: today
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 3
+    theme: darkly
+mainfont: "Georgia"
+sansfont: "Helvetica Neue"
+monofont: "JetBrains Mono"
+---
+
+## Introduction
+
+This analysis explores the Ames Housing dataset to build a regression model predicting home sale prices. The dataset contains 2,930 residential property sales in Ames, Iowa from 2006-2010, with 82 variables describing various property characteristics.
+
+**Objective:** Develop a multiple linear regression model to predict `SalePrice` using relevant predictor variables, demonstrating iterative model improvement and proper documentation of the prompt engineering process with a Large Language Model (LLM).
+
+---
+
+## Step One: Description of Data
+
+### Data Loading and Initial Exploration
+
+*Prompt 10: Load the Ames Housing dataset and show me the structure and dimensions of the data.*
+
+```{r}
+# Load the housing data
+housing <- read.csv("amesHousing2011.csv")
+
+# View first few rows
+head(housing)
+
+# Check dimensions
+cat("Dataset dimensions:", nrow(housing), "rows and", ncol(housing), "columns\n")
+
+# View structure of the dataset
+str(housing)
+```
+
+**R Code Explanation:**
+- `read.csv()` loads the CSV file into a data frame called `housing`
+- `head()` displays the first 6 rows to see what the data looks like
+- `nrow()` and `ncol()` show the number of rows (observations) and columns (variables)
+- `str()` shows the structure: variable names, types (numeric, character, etc.), and first few values
+
+### Summary Statistics
+
+*Prompt 11: Generate summary statistics for all variables in the dataset.*
+
+```{r}
+# Summary statistics for all variables
+summary(housing)
+```
+
+**R Code Explanation:**
+- `summary()` provides descriptive statistics for each variable
+- For numeric variables: min, 1st quartile, median, mean, 3rd quartile, max
+- For character/factor variables: counts of each category
+- Also shows count of NA's (missing values) if present
+
+### Exploring the Response Variable: Sale Price
+
+*Prompt 12: Show me the distribution of SalePrice with a histogram and boxplot to identify outliers.*
+
+```{r}
+# Histogram of Sale Price
+hist(housing$SalePrice,
+     breaks = 30,
+     main = "Distribution of Sale Prices",
+     xlab = "Sale Price ($)",
+     col = "lightblue",
+     border = "black")
+
+# Summary statistics for SalePrice
+cat("\nSale Price Summary:\n")
+summary(housing$SalePrice)
+cat("\nStandard Deviation:", sd(housing$SalePrice), "\n")
+
+# Boxplot to identify outliers
+boxplot(housing$SalePrice,
+        main = "Boxplot of Sale Prices",
+        ylab = "Sale Price ($)",
+        col = "lightgreen")
+
+# Identify potential outliers (above 95th percentile)
+price_95 <- quantile(housing$SalePrice, 0.95)
+cat("\n95th percentile of Sale Price: $", price_95, "\n")
+cat("Number of sales above 95th percentile:",
+    sum(housing$SalePrice > price_95), "\n")
+```
+
+**R Code Explanation:**
+- `hist()` creates a histogram showing the distribution of sale prices
+  - `breaks = 30` creates 30 bins for more detail
+  - Right-skewed distribution expected (few expensive homes)
+- `boxplot()` visualizes outliers as points beyond the whiskers
+- `quantile()` calculates percentiles to identify outlier threshold
+- We identify homes above the 95th percentile as potential outliers (mansions)
+
+**Observations:**
+- The distribution appears right-skewed with some high-value outliers
+- These outliers (mansion sales) may distort our regression model
+- Professor recommendation: Remove these outliers before modeling
+
+### Exploring Key Predictor Variables
+
+*Prompt 13: Show me distributions of the most important predictor variables: living area, overall quality, and year built.*
+
+```{r}
+# Living Area (GrLivArea)
+par(mfrow = c(2, 2))  # Create 2x2 plot layout
+
+hist(housing$GrLivArea,
+     breaks = 30,
+     main = "Distribution of Living Area",
+     xlab = "Above Ground Living Area (sq ft)",
+     col = "lightcoral")
+
+# Overall Quality
+hist(housing$OverallQual,
+     breaks = 10,
+     main = "Distribution of Overall Quality",
+     xlab = "Overall Quality (1-10)",
+     col = "lightyellow")
+
+# Year Built
+hist(housing$YearBuilt,
+     breaks = 30,
+     main = "Distribution of Year Built",
+     xlab = "Year Built",
+     col = "lightcyan")
+
+# Total Basement Square Feet
+hist(housing$TotalBsmtSF,
+     breaks = 30,
+     main = "Distribution of Basement Area",
+     xlab = "Total Basement SF",
+     col = "lavender")
+
+par(mfrow = c(1, 1))  # Reset to single plot
+
+# Summary statistics for key predictors
+cat("\nLiving Area Summary:\n")
+summary(housing$GrLivArea)
+
+cat("\nOverall Quality Summary:\n")
+summary(housing$OverallQual)
+
+cat("\nYear Built Summary:\n")
+summary(housing$YearBuilt)
+```
+
+**R Code Explanation:**
+- `par(mfrow = c(2, 2))` sets up a 2×2 grid to display 4 plots together
+- Each histogram shows the distribution of a key predictor variable
+- `par(mfrow = c(1, 1))` resets the plot layout back to single plots
+- Summary statistics help identify the range and central tendency
+
+### Relationships Between Variables
+
+*Prompt 14: Create scatterplots showing the relationship between SalePrice and key predictors.*
+
+```{r}
+# Set up 2x2 plot layout
+par(mfrow = c(2, 2))
+
+# SalePrice vs Living Area
+plot(housing$GrLivArea, housing$SalePrice,
+     main = "Sale Price vs Living Area",
+     xlab = "Living Area (sq ft)",
+     ylab = "Sale Price ($)",
+     pch = 19,
+     col = rgb(0, 0, 1, 0.3))  # Semi-transparent blue
+
+# SalePrice vs Overall Quality
+plot(housing$OverallQual, housing$SalePrice,
+     main = "Sale Price vs Overall Quality",
+     xlab = "Overall Quality (1-10)",
+     ylab = "Sale Price ($)",
+     pch = 19,
+     col = rgb(1, 0, 0, 0.3))  # Semi-transparent red
+
+# SalePrice vs Year Built
+plot(housing$YearBuilt, housing$SalePrice,
+     main = "Sale Price vs Year Built",
+     xlab = "Year Built",
+     ylab = "Sale Price ($)",
+     pch = 19,
+     col = rgb(0, 1, 0, 0.3))  # Semi-transparent green
+
+# SalePrice vs Basement Area
+plot(housing$TotalBsmtSF, housing$SalePrice,
+     main = "Sale Price vs Basement Area",
+     xlab = "Total Basement SF",
+     ylab = "Sale Price ($)",
+     pch = 19,
+     col = rgb(0.5, 0, 0.5, 0.3))  # Semi-transparent purple
+
+par(mfrow = c(1, 1))  # Reset plot layout
+```
+
+**R Code Explanation:**
+- `plot(x, y)` creates scatterplots to visualize relationships
+- `pch = 19` uses filled circles as plot points
+- `rgb(r, g, b, alpha)` creates semi-transparent colors to see overlapping points
+- We're looking for:
+  - **Linear relationships**: Points form a straight line pattern
+  - **Non-linear relationships**: Curved patterns (may need transformation)
+  - **Heteroscedasticity**: Spread of points increases with X (funneling)
+  - **Strength**: How tightly points cluster around a pattern
+
+**Expected Observations:**
+- **Living Area**: Strong positive linear relationship expected
+- **Overall Quality**: Positive relationship, possibly non-linear (may need log transformation)
+- **Year Built**: Positive relationship, variance may increase with year (heteroscedasticity)
+
+### Correlation Analysis
+
+*Prompt 15: Calculate correlations between SalePrice and numeric predictors to identify the strongest relationships.*
+
+```{r}
+# Select key numeric variables
+numeric_vars <- c("SalePrice", "GrLivArea", "OverallQual", "OverallCond",
+                 "YearBuilt", "YearRemod.Add", "TotalBsmtSF", "X1stFlrSF",
+                  "X2ndFlrSF", "BedroomAbvGr", "TotRmsAbvGrd",
+                  "GarageCars", "GarageArea")
+
+# Calculate correlation matrix
+cor_matrix <- cor(housing[, numeric_vars], use = "complete.obs")
+
+# Display correlations with SalePrice, sorted by absolute value
+cor_with_price <- cor_matrix[, "SalePrice"]
+cor_sorted <- sort(abs(cor_with_price), decreasing = TRUE)
+
+cat("Correlations with Sale Price (sorted by strength):\n")
+print(round(cor_sorted, 3))
+
+cat("\n\nTop 10 correlations with SalePrice:\n")
+print(round(cor_with_price[names(cor_sorted)[1:10]], 3))
+```
+
+**R Code Explanation:**
+- `cor()` calculates correlation coefficients between variables
+- `use = "complete.obs"` handles missing data by using only complete cases
+- Correlation ranges from -1 (perfect negative) to +1 (perfect positive)
+- Values close to 0 indicate weak or no linear relationship
+- `sort(abs(...))` sorts by absolute value to find strongest relationships regardless of direction
+
+**Important Note from Professor:**
+Pairwise correlations can miss important relationships. For example, location variables may have mediating effects on other predictors that won't show up in simple correlations.
+
+### Missing Data Analysis
+
+*Prompt 16: Identify which variables have missing data and how much.*
+
+```{r}
+# Count missing values per variable
+missing_counts <- colSums(is.na(housing))
+
+# Show only variables with missing data
+vars_with_missing <- missing_counts[missing_counts > 0]
+
+if (length(vars_with_missing) > 0) {
+  cat("Variables with missing data:\n")
+
+  # Calculate percentage missing
+  missing_pct <- 100 * vars_with_missing / nrow(housing)
+
+  # Create summary data frame
+  missing_summary <- data.frame(
+    Variable = names(vars_with_missing),
+    Count = vars_with_missing,
+    Percentage = round(missing_pct, 2)
+  )
+
+  # Sort by count
+  missing_summary <- missing_summary[order(-missing_summary$Count), ]
+
+  print(missing_summary, row.names = FALSE)
+} else {
+  cat("No missing data detected in the dataset.\n")
+}
+
+# Total missing values
+cat("\nTotal missing values in dataset:", sum(is.na(housing)), "\n")
+```
+
+**R Code Explanation:**
+- `is.na()` returns TRUE for missing values
+- `colSums()` counts missing values for each column
+- We calculate both counts and percentages to assess severity
+- Variables with >20% missing may need to be excluded
+- Variables with <5% missing can use simple imputation
+- **Professor recommendation**: Use multiple imputation instead of simple median imputation
+
+### Summary of Key Findings
+
+Based on the initial exploration:
+
+1. **Dataset**: 2,930 observations with 82 variables describing housing characteristics
+
+2. **Response Variable (SalePrice)**:
+   - Right-skewed distribution
+   - Outliers present (mansion sales) - will need to remove these
+   - Will likely benefit from log transformation
+
+3. **Key Predictors Identified**:
+   - Living area (GrLivArea) - likely strongest predictor
+   - Overall quality (OverallQual) - may have non-linear relationship
+   - Year built - shows heteroscedastic relationship
+   - Location variables - important per real estate folklore
+
+4. **Data Quality Issues**:
+   - Missing data in several variables
+   - Outliers in sale price need addressing
+   - Some relationships appear non-linear
+
+**Next Steps**: Proceed to Step Two - data preprocessing and regression modeling.
+

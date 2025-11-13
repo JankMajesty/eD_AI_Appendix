@@ -1,0 +1,367 @@
+---
+title: "Ames Housing Dataset Regression Analysis (Python Version)"
+author: "Lucas McGill"
+date: today
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 3
+    theme: darkly
+mainfont: "Georgia"
+sansfont: "Helvetica Neue"
+monofont: "JetBrains Mono"
+---
+
+## Introduction
+
+This analysis explores the Ames Housing dataset to build a regression model predicting home sale prices using Python. The dataset contains 2,930 residential property sales in Ames, Iowa from 2006-2010, with 82 variables describing various property characteristics.
+
+**Objective:** Develop a multiple linear regression model to predict `SalePrice` using relevant predictor variables, demonstrating iterative model improvement and proper documentation of the prompt engineering process with a Large Language Model (LLM).
+
+**Python Approach:** This document uses Python's scientific computing stack (pandas, numpy, statsmodels, seaborn, plotly) as an alternative to R for the same analysis.
+
+---
+
+## Step One: Description of Data
+
+### Data Loading and Initial Exploration
+
+*Prompt 10 [PYTHON]: Load the Ames Housing dataset using pandas and show me the structure and dimensions of the data.*
+
+```{python}
+# Load libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set seaborn style for better-looking plots
+sns.set_theme(style="whitegrid", palette="colorblind")
+
+# Load the housing data
+housing = pd.read_csv("amesHousing2011.csv")
+
+# View first few rows
+print("First 5 rows of the dataset:")
+print(housing.head())
+
+# Check dimensions
+print(f"\nDataset dimensions: {housing.shape[0]} rows and {housing.shape[1]} columns")
+
+# View structure of the dataset (data types and non-null counts)
+print("\nDataset info:")
+print(housing.info())
+```
+
+**Python Code Explanation:**
+- `pd.read_csv()` loads the CSV file into a DataFrame (pandas' equivalent to R's data frame)
+- `head()` displays the first 5 rows to see what the data looks like
+- `shape` attribute shows the dimensions as (rows, columns)
+- `info()` shows data types (int64, float64, object) and non-null counts for each column
+- `sns.set_theme()` sets the default styling for seaborn plots (cleaner than matplotlib defaults)
+
+### Summary Statistics
+
+*Prompt 11 [PYTHON]: Generate summary statistics for all variables in the dataset using pandas.*
+
+```{python}
+# Summary statistics for numeric variables
+print("Summary statistics for numeric variables:")
+print(housing.describe())
+
+# For more detailed stats including categorical variables
+print("\n\nDetailed information about all columns:")
+print(housing.describe(include='all'))
+```
+
+**Python Code Explanation:**
+- `describe()` provides descriptive statistics for numeric columns
+- For numeric variables: count, mean, std, min, 25%, 50%, 75%, max
+- `describe(include='all')` includes categorical (object) variables with unique counts and top values
+- Note: pandas shows median as 50th percentile, R shows it separately
+
+### Exploring the Response Variable: Sale Price
+
+*Prompt 12 [PYTHON]: Show me the distribution of SalePrice with a histogram and boxplot using seaborn to identify outliers.*
+
+```{python}
+# Create figure with subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+# Histogram of Sale Price
+sns.histplot(data=housing, x='SalePrice', bins=30, kde=True,
+             color='steelblue', alpha=0.6, ax=ax1)
+ax1.set_title('Distribution of Sale Prices', fontsize=14, fontweight='bold')
+ax1.set_xlabel('Sale Price ($)', fontsize=12)
+ax1.set_ylabel('Frequency', fontsize=12)
+ax1.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:,.0f}'))
+
+# Boxplot to identify outliers
+sns.boxplot(data=housing, y='SalePrice', color='lightgreen', ax=ax2)
+ax2.set_title('Boxplot of Sale Prices', fontsize=14, fontweight='bold')
+ax2.set_ylabel('Sale Price ($)', fontsize=12)
+ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:,.0f}'))
+
+plt.tight_layout()
+plt.show()
+
+# Summary statistics for SalePrice
+print("\nSale Price Summary:")
+print(housing['SalePrice'].describe())
+print(f"\nStandard Deviation: ${housing['SalePrice'].std():,.2f}")
+
+# Identify potential outliers (above 95th percentile)
+price_95 = housing['SalePrice'].quantile(0.95)
+print(f"\n95th percentile of Sale Price: ${price_95:,.2f}")
+print(f"Number of sales above 95th percentile: {(housing['SalePrice'] > price_95).sum()}")
+```
+
+**Python Code Explanation:**
+- `plt.subplots()` creates a figure with multiple axes (subplots)
+- `sns.histplot()` creates a modern histogram with optional KDE (kernel density estimate)
+  - `bins=30` creates 30 bins for more detail
+  - `kde=True` adds smooth density curve overlay
+  - Right-skewed distribution expected (few expensive homes)
+- `sns.boxplot()` visualizes outliers as diamonds beyond the whiskers
+- `quantile()` calculates percentiles to identify outlier threshold
+- We identify homes above the 95th percentile as potential outliers (mansions)
+- `.FuncFormatter()` formats axis labels as currency
+
+**Observations:**
+- The distribution appears right-skewed with some high-value outliers
+- These outliers (mansion sales) may distort our regression model
+- Professor recommendation: Remove these outliers before modeling
+
+### Exploring Key Predictor Variables
+
+*Prompt 13 [PYTHON]: Show me distributions of the most important predictor variables using seaborn: living area, overall quality, year built, and basement area.*
+
+```{python}
+# Create 2x2 subplot layout
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# Living Area (GrLivArea)
+sns.histplot(data=housing, x='GrLivArea', bins=30, kde=True,
+             color='lightcoral', alpha=0.6, ax=axes[0, 0])
+axes[0, 0].set_title('Distribution of Living Area', fontsize=12, fontweight='bold')
+axes[0, 0].set_xlabel('Above Ground Living Area (sq ft)', fontsize=10)
+
+# Overall Quality
+sns.histplot(data=housing, x='OverallQual', bins=10, kde=False,
+             color='gold', alpha=0.6, ax=axes[0, 1])
+axes[0, 1].set_title('Distribution of Overall Quality', fontsize=12, fontweight='bold')
+axes[0, 1].set_xlabel('Overall Quality (1-10)', fontsize=10)
+
+# Year Built
+sns.histplot(data=housing, x='YearBuilt', bins=30, kde=True,
+             color='lightcyan', alpha=0.6, ax=axes[1, 0])
+axes[1, 0].set_title('Distribution of Year Built', fontsize=12, fontweight='bold')
+axes[1, 0].set_xlabel('Year Built', fontsize=10)
+
+# Total Basement Square Feet
+sns.histplot(data=housing, x='TotalBsmtSF', bins=30, kde=True,
+             color='lavender', alpha=0.6, ax=axes[1, 1])
+axes[1, 1].set_title('Distribution of Basement Area', fontsize=12, fontweight='bold')
+axes[1, 1].set_xlabel('Total Basement SF', fontsize=10)
+
+plt.tight_layout()
+plt.show()
+
+# Summary statistics for key predictors
+print("\nLiving Area Summary:")
+print(housing['GrLivArea'].describe())
+
+print("\nOverall Quality Summary:")
+print(housing['OverallQual'].describe())
+
+print("\nYear Built Summary:")
+print(housing['YearBuilt'].describe())
+
+print("\nBasement Area Summary:")
+print(housing['TotalBsmtSF'].describe())
+```
+
+**Python Code Explanation:**
+- `plt.subplots(2, 2)` creates a 2×2 grid of axes for multiple plots
+- Access individual axes with `axes[row, col]` indexing
+- Each `sns.histplot()` creates a histogram for a key predictor variable
+- `tight_layout()` automatically adjusts spacing to prevent overlap
+- Summary statistics help identify the range and central tendency
+- Note: Python uses zero-based indexing (axes[0, 0]), R uses one-based indexing
+
+### Relationships Between Variables
+
+*Prompt 14 [PYTHON]: Create scatterplots using seaborn showing the relationship between SalePrice and key predictors.*
+
+```{python}
+# Create 2x2 subplot layout
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# SalePrice vs Living Area
+sns.scatterplot(data=housing, x='GrLivArea', y='SalePrice',
+                alpha=0.3, color='blue', ax=axes[0, 0])
+axes[0, 0].set_title('Sale Price vs Living Area', fontsize=12, fontweight='bold')
+axes[0, 0].set_xlabel('Living Area (sq ft)', fontsize=10)
+axes[0, 0].set_ylabel('Sale Price ($)', fontsize=10)
+axes[0, 0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+# SalePrice vs Overall Quality
+sns.scatterplot(data=housing, x='OverallQual', y='SalePrice',
+                alpha=0.3, color='red', ax=axes[0, 1])
+axes[0, 1].set_title('Sale Price vs Overall Quality', fontsize=12, fontweight='bold')
+axes[0, 1].set_xlabel('Overall Quality (1-10)', fontsize=10)
+axes[0, 1].set_ylabel('Sale Price ($)', fontsize=10)
+axes[0, 1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+# SalePrice vs Year Built
+sns.scatterplot(data=housing, x='YearBuilt', y='SalePrice',
+                alpha=0.3, color='green', ax=axes[1, 0])
+axes[1, 0].set_title('Sale Price vs Year Built', fontsize=12, fontweight='bold')
+axes[1, 0].set_xlabel('Year Built', fontsize=10)
+axes[1, 0].set_ylabel('Sale Price ($)', fontsize=10)
+axes[1, 0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+# SalePrice vs Basement Area
+sns.scatterplot(data=housing, x='TotalBsmtSF', y='SalePrice',
+                alpha=0.3, color='purple', ax=axes[1, 1])
+axes[1, 1].set_title('Sale Price vs Basement Area', fontsize=12, fontweight='bold')
+axes[1, 1].set_xlabel('Total Basement SF', fontsize=10)
+axes[1, 1].set_ylabel('Sale Price ($)', fontsize=10)
+axes[1, 1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+plt.tight_layout()
+plt.show()
+```
+
+**Python Code Explanation:**
+- `sns.scatterplot()` creates scatterplots to visualize relationships
+- `alpha=0.3` creates semi-transparent points to see overlapping observations
+- We're looking for:
+  - **Linear relationships**: Points form a straight line pattern
+  - **Non-linear relationships**: Curved patterns (may need transformation)
+  - **Heteroscedasticity**: Spread of points increases with X (funneling)
+  - **Strength**: How tightly points cluster around a pattern
+
+**Expected Observations:**
+- **Living Area**: Strong positive linear relationship expected
+- **Overall Quality**: Positive relationship, possibly non-linear (may need log transformation)
+- **Year Built**: Positive relationship, variance may increase with year (heteroscedasticity)
+
+### Correlation Analysis
+
+*Prompt 15 [PYTHON]: Calculate correlations between SalePrice and numeric predictors using pandas to identify the strongest relationships.*
+
+```{python}
+# Select key numeric variables
+numeric_vars = ['SalePrice', 'GrLivArea', 'OverallQual', 'OverallCond',
+                'YearBuilt', 'YearRemod/Add', 'TotalBsmtSF', '1stFlrSF',
+                '2ndFlrSF', 'BedroomAbvGr', 'TotRmsAbvGrd',
+                'GarageCars', 'GarageArea']
+
+# Calculate correlation matrix
+cor_matrix = housing[numeric_vars].corr()
+
+# Display correlations with SalePrice, sorted by absolute value
+cor_with_price = cor_matrix['SalePrice'].sort_values(ascending=False)
+
+print("Correlations with Sale Price (sorted by strength):\n")
+print(cor_with_price.round(3))
+
+# Visualize correlation heatmap
+fig, ax = plt.subplots(figsize=(12, 10))
+sns.heatmap(cor_matrix, annot=True, fmt='.2f', cmap='coolwarm',
+            center=0, square=True, linewidths=1,
+            cbar_kws={'label': 'Correlation'}, ax=ax)
+ax.set_title('Correlation Matrix: Housing Variables',
+             fontsize=14, fontweight='bold', pad=20)
+plt.tight_layout()
+plt.show()
+
+print("\n\nTop 10 correlations with SalePrice:")
+print(cor_with_price.head(10).round(3))
+```
+
+**Python Code Explanation:**
+- `corr()` calculates Pearson correlation coefficients between variables
+- Correlation ranges from -1 (perfect negative) to +1 (perfect positive)
+- Values close to 0 indicate weak or no linear relationship
+- `sort_values()` sorts correlations by strength
+- `sns.heatmap()` creates a visual correlation matrix with color coding
+  - Red indicates positive correlation
+  - Blue indicates negative correlation
+  - White (center=0) indicates no correlation
+
+**Important Note from Professor:**
+Pairwise correlations can miss important relationships. For example, location variables may have mediating effects on other predictors that won't show up in simple correlations.
+
+### Missing Data Analysis
+
+*Prompt 16 [PYTHON]: Identify which variables have missing data and how much using pandas.*
+
+```{python}
+# Count missing values per variable
+missing_counts = housing.isnull().sum()
+
+# Show only variables with missing data
+vars_with_missing = missing_counts[missing_counts > 0]
+
+if len(vars_with_missing) > 0:
+    print("Variables with missing data:\n")
+
+    # Calculate percentage missing
+    missing_pct = 100 * vars_with_missing / len(housing)
+
+    # Create summary DataFrame
+    missing_summary = pd.DataFrame({
+        'Variable': vars_with_missing.index,
+        'Count': vars_with_missing.values,
+        'Percentage': missing_pct.round(2).values
+    })
+
+    # Sort by count
+    missing_summary = missing_summary.sort_values('Count', ascending=False)
+
+    print(missing_summary.to_string(index=False))
+else:
+    print("No missing data detected in the dataset.")
+
+# Total missing values
+print(f"\nTotal missing values in dataset: {housing.isnull().sum().sum()}")
+```
+
+**Python Code Explanation:**
+- `isnull()` returns True for missing values (NaN, None, etc.)
+- `sum()` counts missing values for each column
+- We calculate both counts and percentages to assess severity
+- Variables with >20% missing may need to be excluded
+- Variables with <5% missing can use simple imputation
+- **Professor recommendation**: Use multiple imputation instead of simple median imputation
+- `to_string(index=False)` prints DataFrame without row indices
+
+---
+
+## Python vs R: Key Differences in Step One
+
+| Task | R | Python (pandas) |
+|------|---|-----------------|
+| Load data | `read.csv()` | `pd.read_csv()` |
+| First rows | `head()` | `.head()` |
+| Dimensions | `nrow()`, `ncol()` | `.shape[0]`, `.shape[1]` |
+| Structure | `str()` | `.info()` |
+| Summary stats | `summary()` | `.describe()` |
+| Missing values | `is.na()` | `.isnull()` or `.isna()` |
+| Column sum | `colSums()` | `.sum()` |
+| Histogram | `hist()` | `sns.histplot()` |
+| Scatter plot | `plot()` | `sns.scatterplot()` |
+| Correlation | `cor()` | `.corr()` |
+
+**Key Python Advantages:**
+- Seaborn produces more polished plots by default
+- Pandas has more consistent syntax (method chaining)
+- Better integration with interactive visualization (plotly)
+
+**Key R Advantages:**
+- More concise syntax for statistical tasks
+- `summary()` works on all variable types automatically
+- Statistical focus (designed for data analysis)

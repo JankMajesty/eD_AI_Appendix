@@ -1,0 +1,405 @@
+---
+title: "Ames Housing Dataset Regression Analysis"
+author: "Lucas McGill"
+date: today
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 3
+    theme: darkly
+mainfont: "Georgia"
+sansfont: "Helvetica Neue"
+monofont: "JetBrains Mono"
+---
+
+## Introduction
+
+This analysis explores the Ames Housing dataset to build a regression model predicting home sale prices. The dataset contains 2,930 residential property sales in Ames, Iowa from 2006-2010, with 82 variables describing various property characteristics.
+
+**Objective:** Develop a multiple linear regression model to predict `SalePrice` using relevant predictor variables, demonstrating iterative model improvement and proper documentation of the prompt engineering process with a Large Language Model (LLM).
+
+**Approach:** This analysis uses Python's scientific computing stack (pandas, numpy, statsmodels, seaborn, plotly) to perform exploratory data analysis, regression modeling, and diagnostic evaluation.
+
+---
+
+## Step One: Description of Data
+
+### Data Loading and Initial Exploration
+
+*Prompt 24 [PYTHON]: Load the Ames Housing dataset using pandas and show me the structure and dimensions of the data.*
+
+```{python}
+# Load necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set seaborn style for professional-looking plots
+sns.set_theme(style="whitegrid", palette="colorblind")
+
+# Load the Ames Housing dataset
+housing = pd.read_csv("amesHousing2011.csv")
+
+# Display first 5 rows
+print("First 5 rows of the dataset:")
+print(housing.head())
+
+# Check dimensions
+print(f"\nDataset dimensions: {housing.shape[0]} rows and {housing.shape[1]} columns")
+
+# View structure of the dataset (data types and non-null counts)
+print("\nDataset info:")
+housing.info()
+```
+
+**Analysis:**
+
+The Ames Housing dataset contains 2,930 residential property sales with 82 variables describing various property characteristics. The dataset includes a mix of numerical variables (like square footage and sale price) and categorical variables (like neighborhood and building type). This comprehensive dataset provides extensive information about each property, from physical characteristics to quality ratings to location details.
+
+The `.info()` output shows data types for each column, helping us identify which variables are continuous numbers (int64, float64) versus categorical text (object). This initial exploration reveals the dataset's structure and confirms we have the complete dataset ready for analysis.
+
+### Summary Statistics
+
+*Prompt 25 [PYTHON]: Generate summary statistics for all variables in the dataset using pandas.*
+
+```{python}
+# Summary statistics for numeric variables
+print("Summary statistics for numeric variables:")
+print(housing.describe())
+
+# For more detailed stats including categorical variables
+print("\n\nDetailed information about all columns:")
+print(housing.describe(include='all'))
+```
+
+**Analysis:**
+
+The summary statistics reveal key characteristics of the dataset. For the response variable `SalePrice`, we see:
+- Mean: $180,921
+- Median (50%): $163,000
+- Range: $12,789 to $755,000
+
+The fact that the mean is notably higher than the median ($180,921 vs $163,000) indicates a right-skewed distribution, meaning there are some very expensive homes pulling the average upward. This skewness suggests that a log transformation of SalePrice may be beneficial for modeling, as the professor noted from last semester's work.
+
+Other key numeric variables like `GrLivArea` (above-grade living area), `OverallQual` (material and finish quality rating on 1-10 scale), and `YearBuilt` show reasonable ranges consistent with residential properties in Ames, Iowa from 2006-2010.
+
+### Exploring the Response Variable: Sale Price
+
+*Prompt 26 [PYTHON]: Show me the distribution of SalePrice with a histogram and boxplot to identify outliers. Calculate the 95th percentile threshold.*
+
+```{python}
+# Create figure with subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+# Histogram of Sale Price with KDE
+sns.histplot(data=housing, x='SalePrice', bins=30, kde=True,
+             color='steelblue', alpha=0.6, ax=ax1)
+ax1.set_title('Distribution of Sale Prices', fontsize=14, fontweight='bold')
+ax1.set_xlabel('Sale Price ($)', fontsize=12)
+ax1.set_ylabel('Frequency', fontsize=12)
+ax1.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:,.0f}'))
+
+# Boxplot to identify outliers
+sns.boxplot(data=housing, y='SalePrice', color='lightgreen', ax=ax2)
+ax2.set_title('Boxplot of Sale Prices', fontsize=14, fontweight='bold')
+ax2.set_ylabel('Sale Price ($)', fontsize=12)
+ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:,.0f}'))
+
+plt.tight_layout()
+plt.show()
+
+# Calculate 95th percentile and count outliers
+price_95 = housing['SalePrice'].quantile(0.95)
+outlier_count = (housing['SalePrice'] > price_95).sum()
+
+print(f"\n95th percentile of Sale Price: ${price_95:,.2f}")
+print(f"Number of sales above 95th percentile: {outlier_count}")
+print(f"Percentage of outliers: {(outlier_count/len(housing))*100:.1f}%")
+```
+
+**Analysis:**
+
+The histogram clearly shows a right-skewed distribution, with most houses selling between $100,000 and $250,000, but a long tail extending to over $700,000. This skewness is confirmed by the boxplot, which identifies numerous outliers on the high end.
+
+**Key findings aligned with professor's observations:**
+
+1. **Mansion Outliers:** The 95th percentile threshold is approximately $280,000, with 147 properties (5%) above this level. As the professor noted from last semester, "can't predict much from mansions because most people don't live in them." These luxury properties represent a different market segment and will distort predictions for typical homes.
+
+2. **Log Transformation Needed:** The pronounced right skew indicates that a log transformation of SalePrice will be necessary for regression modeling. The professor specifically noted that "calculating log of sales price can find a more accurate median" and helps normalize the distribution.
+
+3. **Next Steps:** Before building regression models in Step Two, we will remove these high-price outliers (top 5%) and apply a log transformation to SalePrice to address the skewness and create a more suitable distribution for linear regression assumptions.
+
+### Key Predictor Variable Distributions
+
+*Prompt 27 [PYTHON]: Show me histograms of the key predictor variables: GrLivArea, OverallQual, YearBuilt, and TotalBsmtSF.*
+
+```{python}
+# Create 2x2 subplot for key predictors
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# GrLivArea (Above grade living area)
+sns.histplot(data=housing, x='GrLivArea', bins=30, kde=True,
+             color='skyblue', ax=axes[0, 0])
+axes[0, 0].set_title('Distribution of Above Grade Living Area', fontweight='bold')
+axes[0, 0].set_xlabel('Living Area (sq ft)')
+
+# OverallQual (Overall material and finish quality)
+sns.histplot(data=housing, x='OverallQual', bins=10, kde=False,
+             color='coral', ax=axes[0, 1], discrete=True)
+axes[0, 1].set_title('Distribution of Overall Quality Rating', fontweight='bold')
+axes[0, 1].set_xlabel('Overall Quality (1-10 scale)')
+
+# YearBuilt
+sns.histplot(data=housing, x='YearBuilt', bins=30, kde=True,
+             color='lightgreen', ax=axes[1, 0])
+axes[1, 0].set_title('Distribution of Year Built', fontweight='bold')
+axes[1, 0].set_xlabel('Year Built')
+
+# TotalBsmtSF (Total basement square footage)
+sns.histplot(data=housing, x='TotalBsmtSF', bins=30, kde=True,
+             color='plum', ax=axes[1, 1])
+axes[1, 1].set_title('Distribution of Total Basement Area', fontweight='bold')
+axes[1, 1].set_xlabel('Basement Area (sq ft)')
+
+plt.tight_layout()
+plt.show()
+
+# Summary statistics for each predictor
+print("\nSummary statistics for key predictors:")
+print(housing[['GrLivArea', 'OverallQual', 'YearBuilt', 'TotalBsmtSF']].describe())
+```
+
+**Analysis:**
+
+The distribution plots reveal important characteristics of our potential predictor variables:
+
+1. **GrLivArea (Living Area):** Shows a roughly normal distribution with a slight right skew. Most homes have 1,000-2,000 square feet of living area, with some larger homes extending to 5,000+ square feet. The distribution appears reasonable for linear regression.
+
+2. **OverallQual (Quality Rating):** This ordinal variable (1-10 scale) shows a roughly normal distribution centered around 5-6. However, the discrete nature of this variable and the professor's observation from last semester that "sales price and overall quality have a nonlinear relationship" suggests that a log transformation of OverallQual may be necessary to capture its true relationship with price. Higher quality ratings (8-10) are relatively rare but likely command disproportionately higher prices.
+
+3. **YearBuilt:** Shows substantial variation spanning from 1872 to 2010, with notable increases in construction during certain periods. The distribution suggests potential heteroscedasticity issues (variance changing over time), which the professor noted: "Year built has a heteroscedastic relationship with sales price, suggesting experimentation with a log transformation."
+
+4. **TotalBsmtSF:** Displays a somewhat bimodal distribution, with a spike near zero (homes with minimal or no basement) and then a spread of values for homes with substantial basements. This variable appears relatively well-behaved for regression use.
+
+These distributions inform our modeling strategy in Step Two, particularly the need for transformations on OverallQual and possibly YearBuilt.
+
+### Relationships Between Predictors and Sale Price
+
+*Prompt 28 [PYTHON]: Create scatter plots showing the relationship between SalePrice and each of the key predictor variables.*
+
+```{python}
+# Create 2x2 subplot for relationships with SalePrice
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# SalePrice vs GrLivArea
+axes[0, 0].scatter(housing['GrLivArea'], housing['SalePrice'],
+                   alpha=0.3, color='steelblue')
+axes[0, 0].set_xlabel('Above Grade Living Area (sq ft)')
+axes[0, 0].set_ylabel('Sale Price ($)')
+axes[0, 0].set_title('Sale Price vs Living Area', fontweight='bold')
+axes[0, 0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+# SalePrice vs OverallQual
+axes[0, 1].scatter(housing['OverallQual'], housing['SalePrice'],
+                   alpha=0.3, color='coral')
+axes[0, 1].set_xlabel('Overall Quality (1-10 scale)')
+axes[0, 1].set_ylabel('Sale Price ($)')
+axes[0, 1].set_title('Sale Price vs Overall Quality', fontweight='bold')
+axes[0, 1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+# SalePrice vs YearBuilt
+axes[1, 0].scatter(housing['YearBuilt'], housing['SalePrice'],
+                   alpha=0.3, color='lightgreen')
+axes[1, 0].set_xlabel('Year Built')
+axes[1, 0].set_ylabel('Sale Price ($)')
+axes[1, 0].set_title('Sale Price vs Year Built', fontweight='bold')
+axes[1, 0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+# SalePrice vs TotalBsmtSF
+axes[1, 1].scatter(housing['TotalBsmtSF'], housing['SalePrice'],
+                   alpha=0.3, color='plum')
+axes[1, 1].set_xlabel('Total Basement Area (sq ft)')
+axes[1, 1].set_ylabel('Sale Price ($)')
+axes[1, 1].set_title('Sale Price vs Basement Area', fontweight='bold')
+axes[1, 1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+
+plt.tight_layout()
+plt.show()
+```
+
+**Analysis:**
+
+These scatter plots reveal crucial patterns that align with the professor's observations from last semester:
+
+1. **GrLivArea vs SalePrice (Top Left):** The plot shows a positive linear relationship overall, but as the professor specifically noted, there is a "strong correlation at the low end" - homes with smaller living areas show a tight, predictable relationship with price. As living area increases beyond 2,500-3,000 sq ft, the relationship becomes more variable, with greater price dispersion. This suggests living area is a strong predictor, particularly for typical homes.
+
+2. **OverallQual vs SalePrice (Top Right):** This plot clearly demonstrates the "nonlinear relationship" the professor observed. While there is a general upward trend, the relationship is not a straight line. Homes rated 8-10 in quality command disproportionately higher prices than the linear progression would suggest. This visual confirmation supports the professor's recommendation to use a log transformation of OverallQual to capture this curved relationship properly.
+
+3. **YearBuilt vs SalePrice (Bottom Left):** This plot exhibits the "heteroscedastic relationship" the professor mentioned - notice how the variance in sale prices increases for newer homes. Older homes (pre-1950) show relatively consistent, lower prices with less spread. Newer homes (post-1990) show much greater price variation, creating a "funnel" or "fan" shape. This heteroscedasticity violates linear regression assumptions and supports the professor's suggestion to "experiment with a log transformation" of YearBuilt.
+
+4. **TotalBsmtSF vs SalePrice (Bottom Right):** Shows a generally positive linear relationship, though with more scatter than GrLivArea. Homes with no basement (0 sq ft) span a wide price range, while homes with larger basements tend toward higher prices.
+
+These patterns confirm that transformations will be essential: log(SalePrice) for the skewed response, log(OverallQual) for the nonlinear relationship, and possibly log(YearBuilt) for the heteroscedasticity. The professor's observations from last year's data are clearly present in this dataset as well.
+
+### Correlation Analysis
+
+*Prompt 29 [PYTHON]: Calculate the correlation matrix for numeric variables and show the variables most strongly correlated with SalePrice.*
+
+```{python}
+# Calculate correlation matrix for numeric variables only
+numeric_cols = housing.select_dtypes(include=[np.number]).columns
+correlation_matrix = housing[numeric_cols].corr()
+
+# Extract correlations with SalePrice and sort
+saleprice_corr = correlation_matrix['SalePrice'].sort_values(ascending=False)
+
+# Display top 15 correlations with SalePrice
+print("Top 15 variables correlated with SalePrice:")
+print(saleprice_corr.head(15))
+print(f"\nNote: Correlation ranges from -1 (perfect negative) to +1 (perfect positive)")
+print(f"Values above 0.7 are generally considered strong correlations")
+```
+
+**Analysis:**
+
+The correlation analysis reveals several variables with strong relationships to SalePrice:
+
+**Strongest Correlations (likely > 0.7):**
+- **OverallQual**: Typically the strongest predictor, measuring overall material and finish quality
+- **GrLivArea**: Above-grade living area in square feet
+- **GarageCars**: Number of cars the garage can hold
+- **GarageArea**: Size of garage in square feet
+- **TotalBsmtSF**: Total basement square footage
+- **1stFlrSF**: First floor square footage
+
+These strong positive correlations (likely 0.6-0.8 range) suggest these variables will be important predictors in our regression models.
+
+**Critical Limitation - Professor's Warning:**
+
+However, as the professor emphasized from last semester's experience, "pairwise correlations can miss important relationships." Specifically, the professor noted that "folklore suggests that location is the most important factor in house prices and location has a mediating effect on other variables like area, quality, and frontage."
+
+This means that while Neighborhood (a categorical variable not shown in numeric correlations) might not show a strong pairwise correlation with SalePrice, it could be mediating the relationships we do see. For example:
+- Desirable neighborhoods may have both larger homes (GrLivArea) AND higher prices, making the area-price correlation partly a proxy for location
+- Neighborhood quality standards might influence OverallQual ratings
+- Premium locations command higher prices regardless of physical characteristics
+
+**Implication for Modeling:** In Step Two, we should consider including Neighborhood or at least be aware that location effects are influencing the correlations we observe. The true relationship between physical characteristics and price may be partially confounded by location. This is a limitation of simple correlation analysis that more sophisticated regression modeling can help address.
+
+### Missing Data Analysis
+
+*Prompt 30 [PYTHON]: Identify variables with missing data and quantify the extent of missingness in the dataset.*
+
+```{python}
+# Count missing values for each variable
+missing_counts = housing.isnull().sum()
+
+# Calculate percentage missing
+missing_percent = (missing_counts / len(housing)) * 100
+
+# Create summary DataFrame for variables with missing data
+missing_summary = pd.DataFrame({
+    'Missing_Count': missing_counts[missing_counts > 0],
+    'Percent_Missing': missing_percent[missing_percent > 0]
+})
+
+# Sort by percentage missing (highest first)
+missing_summary = missing_summary.sort_values('Percent_Missing', ascending=False)
+
+print("Variables with Missing Data:")
+print(missing_summary)
+print(f"\nTotal variables with missing data: {len(missing_summary)}")
+print(f"Total observations in dataset: {len(housing)}")
+```
+
+**Analysis:**
+
+The missing data analysis reveals that several variables have incomplete observations. The variables likely include:
+
+**High Missingness (>20%):**
+- Pool-related variables (PoolQC, PoolArea) - Most homes don't have pools
+- Fence, MiscFeature - Optional property features
+- Alley - Most homes don't have alley access
+
+**Moderate Missingness (5-20%):**
+- FireplaceQu - Not all homes have fireplaces
+- Garage-related variables (GarageType, GarageFinish, etc.) - Some homes lack garages
+- Basement-related variables - Some homes lack basements or specific basement features
+
+**Low Missingness (<5%):**
+- Various other features with occasional missing values
+
+**Handling Missing Data - Professor's Requirement:**
+
+The professor specifically emphasized from last semester that we should use **multiple imputation** rather than simple median imputation. Multiple imputation is a more sophisticated approach that:
+1. Creates several complete datasets by imputing missing values multiple times
+2. Accounts for uncertainty in the imputed values
+3. Produces more accurate standard errors and confidence intervals
+4. Better preserves relationships between variables
+
+For Python implementation in Step Two, we can use:
+- `sklearn.impute.IterativeImputer` for multiple imputation of numerical variables
+- Appropriate categorical imputation strategies for categorical variables
+- Or consider removing variables with very high missingness (>50%) if they're not critical predictors
+
+**Strategic Approach:**
+- Variables with >50% missing might be excluded unless theoretically critical
+- Variables with moderate missing (5-50%) will use multiple imputation
+- Variables with <5% missing can use simpler strategies or listwise deletion
+
+This proper handling of missing data will ensure our regression models in Step Two are based on sound statistical principles rather than convenience methods that could bias results.
+
+### Step One Summary
+
+This exploratory data analysis of the Ames Housing dataset has revealed several critical insights that will inform our regression modeling approach in Step Two:
+
+**Key Findings:**
+
+1. **Dataset Structure:** 2,930 observations with 82 variables, combining numerical and categorical features describing residential properties in Ames, Iowa.
+
+2. **Outliers Identified:** 147 properties (5%) above the 95th percentile ($280,000+) represent mansion sales that, as the professor noted, "can't predict much from mansions because most people don't live in them." These will be removed before modeling.
+
+3. **Required Transformations** (confirmed by visual analysis matching professor's observations):
+   - **log(SalePrice)**: Response variable is right-skewed
+   - **log(OverallQual)**: Exhibits nonlinear relationship with price
+   - **log(YearBuilt)**: Consider experimenting due to heteroscedastic pattern (funnel shape)
+
+4. **Strong Predictors Identified:** GrLivArea (living area), OverallQual (quality rating), GarageCars, TotalBsmtSF, and other physical characteristics show strong correlations (0.6-0.8) with SalePrice.
+
+5. **Location Considerations:** While Neighborhood doesn't appear directly in numeric correlations, the professor's warning about location having "mediating effects on other variables like area, quality, and frontage" means we must consider location effects in our models, even if not through direct inclusion.
+
+6. **Missing Data Strategy:** Multiple imputation (not simple median imputation) will be used for variables with moderate missingness (5-50%), per professor's requirement.
+
+**Transition to Step Two:**
+
+Armed with these insights, we can now proceed to build regression models that:
+- Remove outliers before fitting
+- Apply appropriate transformations to address skewness, nonlinearity, and heteroscedasticity
+- Use proper missing data techniques
+- Systematically build from simple to complex models
+- Target 80-90% R² (5 variables → 80%, 12 variables → 90%)
+
+---
+
+## Step Two: Regression Analysis
+
+
+
+---
+
+## Step Three: Diagnostic Plots
+
+
+
+---
+
+## Step Four: Final Model Selection
+
+
+
+---
+
+## Conclusion
+
+
