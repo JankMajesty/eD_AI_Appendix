@@ -384,6 +384,8 @@ Armed with these insights, we can now proceed to build regression models that:
 
 ## Step Two: Regression Analysis
 
+### Data Preprocessing
+
 **Prompt 37 [PYTHON]:**
 
 Using the housing-analysis-python skill, prepare the Ames Housing dataset for regression analysis by:
@@ -520,6 +522,8 @@ This preprocessed dataset is now ready for regression modeling, with improved di
 
 ---
 
+### Model m1: Baseline Model
+
 **Prompt 38 [PYTHON]:**
 
 Build baseline model (m1) using only GrLivArea to predict log_SalePrice. Display regression summary, interpret R² and coefficient, and explain semi-log model interpretation.
@@ -607,6 +611,8 @@ This percentage interpretation makes intuitive sense. A 100 sq ft addition to a 
 With our baseline established at 42.7% R², we'll add more predictors to improve model fit. The professor's target is 80% R² with 5 variables and 90% with 12 variables, so we have significant room for improvement.
 
 ---
+
+### Model m2: Adding Quality
 
 **Prompt 39 [PYTHON]:**
 
@@ -717,6 +723,8 @@ plt.show()
 With 71.5% R², we're getting closer to the professor's 80% target for 5 variables. We'll add location (Neighborhood), age (YearBuilt), and basement area (TotalBsmtSF) in the next model to reach that target.
 
 ---
+
+### Model m3: Adding Location, Age, and Basement
 
 **Prompt 40 [PYTHON]:**
 
@@ -864,6 +872,8 @@ With 83.2% R², we're in a strong position. The professor suggested 85-90% R² m
 
 ---
 
+### Variable Selection with Lasso Regression
+
 **Prompt 41 [PYTHON]:**
 
 Use Lasso regression with cross-validation to select candidate variables from 17 options. For each selected variable, provide statistical justification (Lasso coefficient, correlation) AND theoretical justification (why buyers care). Don't just copy LLM - show understanding.
@@ -989,6 +999,8 @@ print("  Each variable justified with BOTH empirical evidence AND real-world rea
 We'll build model m4 using the top 8-10 Lasso-selected variables, aiming to approach the professor's 85-90% R² target while maintaining interpretability.
 
 ---
+
+### Model m4: Enhanced 10-Predictor Model
 
 **Prompt 42 [PYTHON]:**
 
@@ -1117,11 +1129,21 @@ plt.show()
 
 Model m4 is the clear winner: better performance with far fewer predictors.
 
+**Addressing the Professor's Location Concern:**
+
+The professor emphasized that "location is the most important factor in house prices and location has a mediating effect on other variables." So why does m4 (without explicit Neighborhood) outperform m3 (with Neighborhood)?
+
+**Location effects are captured indirectly** through correlated physical characteristics in m4. Desirable neighborhoods tend to have: newer homes (log_YearBuilt), higher quality construction (log_OverallQual), larger living areas (GrLivArea), and better-maintained properties (YearRemod/Add, Fireplaces, GarageArea). When we include these physical characteristics, they act as **proxies for neighborhood quality**. A high-quality, newer, well-maintained home is likely in a desirable neighborhood, even without explicitly coding location.
+
+The trade-off is clear: m3 models location **explicitly** but suffers from complexity (24 neighborhood dummies), while m4 models location **implicitly** through physical characteristics and achieves better performance (84.6% vs 83.2%) with far greater interpretability. The professor's warning about location was to avoid missing these effects entirely—m4 doesn't ignore location, it captures it through the physical features that make neighborhoods desirable.
+
 **Next Steps:**
 
 Before finalizing m4, we'll test a few theoretically motivated interaction terms to see if a model m5 could push us into the 85-90% range. However, interactions add complexity, so we'll only include them if they improve R² by >1%.
 
 ---
+
+### Testing Interaction Effects
 
 **Prompt 43 [PYTHON]:**
 
@@ -1196,6 +1218,8 @@ The best interaction (GrLivArea:TotalBsmtSF) added only 0.22 percentage points t
 **Final Model:** m4 with R² = 84.56% (10 predictors, no interactions)
 
 ---
+
+### Step Two Summary: Final Model and Results
 
 **Prompt 44 [PYTHON]:**
 
