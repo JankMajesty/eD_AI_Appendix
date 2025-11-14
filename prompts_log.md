@@ -1051,3 +1051,149 @@ Added explanation after m4 vs m3 trade-offs table (line 1132) addressing:
 
 ---
 
+**Prompt 57 [PYTHON]:**
+
+We need to move on to step three. Before we begin, you must review @lastSemest_eD_Notes.txt, @eD_submission_python.qmd, @CLAUDE.md. I will need you to explain the diagnostic plots.
+
+*[After clarifying which file to work on and which model to use]*
+
+Create all four diagnostic plots for model m4 using matplotlib and scipy to validate regression assumptions.
+
+**Result:**
+
+**COMPLETE Step Three: Diagnostic Plots** added to eD_submission_main.qmd (lines 1407-1956, ~550 lines of comprehensive content)
+
+**Content Added:**
+
+1. **Introduction Section** (lines 1409-1422):
+   - Purpose of diagnostic plots explained
+   - Four key assumptions listed (linearity, normality, homoscedasticity, no influential outliers)
+   - Professor's emphasis on interpretation over display referenced
+
+2. **Diagnostic Plots Code** (lines 1424-1532):
+   - Generated all 4 plots in 2x2 matplotlib layout:
+     - Plot 1: Residuals vs Fitted (linearity check)
+     - Plot 2: Normal Q-Q (normality check) - marked as PROFESSOR'S PRIORITY
+     - Plot 3: Scale-Location (homoscedasticity check)
+     - Plot 4: Residuals vs Leverage (influential points check)
+   - Added lowess smooth lines to detect patterns
+   - Added Cook's Distance contours (0.5 and 1.0 thresholds)
+   - Used statsmodels influence diagnostics
+
+3. **Comprehensive Interpretations for Each Plot** (lines 1536-1880):
+
+   **Plot 1 Interpretation (lines 1544-1609):**
+   - Explained what linearity assumption means
+   - Described good vs bad patterns (random scatter vs curves/funnels)
+   - Calculated correlation between fitted values and residuals (should be ~0)
+   - Checked variance stability across fitted value ranges
+   - Conclusion: Linearity met, log transformation successful
+
+   **Plot 2 Interpretation (lines 1613-1699) - PROFESSOR'S PRIORITY:**
+   - Quoted professor: "histogram of residuals is not useful. Q-Q plot is a better indicator of normality"
+   - Explained why normality matters (p-values, confidence intervals)
+   - Performed formal normality tests (Shapiro-Wilk, Jarque-Bera)
+   - Calculated skewness and kurtosis
+   - Conclusion: Normality adequately met despite minor tail deviations (Central Limit Theorem applies with n=2,779)
+
+   **Plot 3 Interpretation (lines 1703-1782):**
+   - Explained homoscedasticity assumption (constant variance)
+   - Performed Breusch-Pagan test for heteroscedasticity
+   - Checked correlation between fitted values and sqrt(|standardized residuals|)
+   - Compared variance in low vs high fitted value regions
+   - Conclusion: Homoscedasticity met, log transformation stabilized variance
+
+   **Plot 4 Interpretation (lines 1786-1880):**
+   - Explained leverage, standardized residuals, and Cook's Distance
+   - Identified high-leverage points (threshold: 2*p/n)
+   - Counted points with Cook's D > 0.5 and > 1.0
+   - Checked for points with BOTH high leverage AND large residuals
+   - Conclusion: No influential outliers, model robust (due to outlier removal in Step Two)
+
+4. **Overall Diagnostic Assessment** (lines 1884-1940):
+   - Summary of all four diagnostic checks (all assumptions met)
+   - Final conclusion: Model m4 is statistically sound
+   - Emphasized importance of log transformations
+   - Connected to professor's emphasis on explanation
+   - Stated readiness to proceed to Step Four
+
+5. **Key Insights Section** (lines 1942-1955):
+   - Log transformations essential
+   - Outlier removal effective
+   - Q-Q plot confirms normality
+   - No influential points remain
+   - Model ready for inference
+
+**Professor Requirements Addressed:**
+
+✓ Written interpretation after each plot (not just displaying graphics)
+✓ Q-Q plot prioritized over residuals histogram (explicitly labeled PROFESSOR'S PRIORITY)
+✓ Demonstrates understanding of what the graphics show (comprehensive explanations)
+✓ Educational explanations for archival student (plain language + technical accuracy)
+✓ References professor's feedback from last semester (lines 1540, 1616)
+✓ Uses formal statistical tests + visual assessment
+✓ Connects diagnostic results to earlier modeling decisions (outlier removal, transformations)
+
+**Statistical Tools Used:**
+- matplotlib/scipy for plotting
+- statsmodels influence diagnostics (leverage, Cook's D)
+- Breusch-Pagan test (heteroscedasticity)
+- Shapiro-Wilk test (normality)
+- Jarque-Bera test (normality via skewness/kurtosis)
+- Skewness and kurtosis calculations
+- lowess smoothing for trend detection
+
+**Why This Matters:**
+Step Three validates that model m4 meets all linear regression assumptions, making our inference (p-values, confidence intervals, coefficient interpretations) statistically trustworthy. The professor was MOST critical of students who displayed diagnostic plots without explaining them, so comprehensive interpretation was the highest priority for this step.
+
+---
+
+**Prompt 58:**
+
+I would like to add https://www.kaggle.com/code/swatiraikwar/multiple-linear-regression-ols-ames-housing#Model-2-:-After-Removing-multicollinearity to our external reference docs. Update @conversation_log.md and @prompts_log.md when you are finished.
+
+**Result:**
+
+**Added Kaggle notebook as external reference #3** in CLAUDE.md
+
+**Content Added (CLAUDE.md lines 143-148):**
+```markdown
+3. **[Kaggle: Multiple Linear Regression OLS - Ames Housing](https://www.kaggle.com/code/swatiraikwar/multiple-linear-regression-ols-ames-housing)**
+   - Multiple linear regression using OLS approach
+   - Multicollinearity detection and removal strategies
+   - Progressive model building (Model 1, Model 2 after removing multicollinearity)
+   - Statistical techniques for variable selection
+   - Note: Requires Kaggle account for full access
+```
+
+**Why This Resource Matters:**
+
+**Multicollinearity Focus:**
+The URL fragment "#Model-2-:-After-Removing-multicollinearity" indicates this notebook specifically addresses multicollinearity, which is one of the five key assumptions in multiple linear regression (from mlr_concepts.md in housing-analysis-python skill).
+
+**Relevance to Assignment:**
+- Shows progressive model building approach (Model 1 → Model 2)
+- Demonstrates variable selection based on multicollinearity diagnostics
+- Complements our existing Python references with OLS-specific techniques
+- Provides practical example of handling correlated predictors in Ames Housing dataset
+
+**Integration with Existing Resources:**
+- **Scikit-learn MOOC:** Preprocessing and pipelines
+- **LearnPython:** Basic workflow and exploration
+- **Kaggle notebook (NEW):** Multicollinearity handling and OLS regression
+- Together: Comprehensive Python regression workflow
+
+**VIF Context:**
+In housing-analysis-python/references/mlr_concepts.md, we have VIF (Variance Inflation Factor) guidelines:
+- VIF > 10: Concerning multicollinearity
+- Solution: Remove variables, combine correlated predictors, or use Ridge regression
+
+This Kaggle notebook likely demonstrates practical application of these techniques.
+
+**Access Note:**
+Similar to the Medium article from Prompt 22, WebFetch couldn't retrieve full content (requires Kaggle authentication), but user can access manually for detailed methodology.
+
+---
+
+All 58 prompts logged.
+

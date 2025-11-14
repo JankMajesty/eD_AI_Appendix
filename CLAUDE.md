@@ -140,7 +140,14 @@ install.packages(c("ggplot2", "viridis", "scales", "patchwork"))
    - pandas/numpy/seaborn basics
    - Identifying key features affecting price
 
-**Note:** Both resources focus on statistical analysis and visualization approaches compatible with the assignment's linear regression requirements.
+3. **[Kaggle: Multiple Linear Regression OLS - Ames Housing](https://www.kaggle.com/code/swatiraikwar/multiple-linear-regression-ols-ames-housing)**
+   - Multiple linear regression using OLS approach
+   - Multicollinearity detection and removal strategies
+   - Progressive model building (Model 1, Model 2 after removing multicollinearity)
+   - Statistical techniques for variable selection
+   - Note: Requires Kaggle account for full access
+
+**Note:** All resources focus on statistical analysis and visualization approaches compatible with the assignment's linear regression requirements.
 
 ## Claude Skills Integration
 
