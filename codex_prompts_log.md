@@ -90,3 +90,13 @@ Will you create an md file with your suggestions for Claude to read?
 
 ---
 
+**Prompt 8:**
+I asked Claude to incorporate your suggestions. Will you check Claude's work against codex_suggestions_for_claude.md ?
+
+---
+
+**Prompt 9:**
+will you update codex_conersation_log.md and codex_prompts_log.md
+
+---
+

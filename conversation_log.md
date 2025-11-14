@@ -3374,6 +3374,61 @@ This would demonstrate thoroughness and statistical rigor expected by the profes
 
 ---
 
+## CODEX RECOMMENDATIONS IMPLEMENTATION SESSION
+
+### User Request (Meta-Prompt 1):
+"I asked codex for suggestions based on our work. Will you read @codex_suggestions_for_claude.md and make updates to our @eD_submission_main.qmd doc in line with these suggestions. Then update our @prompts_log.md and @conversation_log.md . Think step by step"
+
+### User Reminder (Meta-Prompt 2):
+"Throughout this process, make sure @conversation_log.md and @prompts_log.md are continuously updated."
+
+### User Context Warning (Meta-Prompt 3):
+"Since this is a lot of work. Be aware of context and make sure our logs are updated before we run out of context."
+
+### Claude's Planning Response:
+
+I've read codex_suggestions_for_claude.md. Codex identified 10 specific improvements across Steps 1-3:
+
+**Priority 1 (Critical - Must Address):**
+1. VIF multicollinearity diagnostics for m4
+2. Complete variable justifications for all 10 predictors (currently only 5)
+3. Durbin-Watson independence test
+4. Consolidated diagnostic summary table
+
+**Priority 2 (Important - Should Address):**
+5. Neighborhood location visualization (boxplots/faceted scatterplots)
+6. Categorical encoding explanation before Lasso
+7. Train/test generalization performance
+8. Neighborhood reintroduction test (compare m4 vs m4+Neighborhood)
+
+**Priority 3 (Completeness - Nice to Have):**
+9. Categorical imputation validation with before/after histograms
+10. Enhanced Step One summary linking EDA → preprocessing decisions
+
+**Implementation Plan:**
+
+For EACH improvement, I will:
+1. Create separate Python script (if code needed)
+2. Test script to verify output
+3. Integrate into eD_submission_main.qmd at appropriate location
+4. Update prompts_log.md with prompt number and concise result
+5. Update conversation_log.md with detailed implementation notes
+
+**Logging Strategy:** Each major addition will be logged as separate prompts (59-68) for clear academic documentation.
+
+**Questions before proceeding:**
+- Should I implement all priorities (1-3) or only Priority 1 (Critical)?
+- For variable justifications (#2), should I create complete justifications or placeholder structure for you to fill?
+- Should scripts be created first then integrated, or work directly in .qmd?
+- Continuous log updates or batch at end of each priority level?
+
+### User Confirmation:
+"I confirm this plan"
+
+*[User confirmed implementing all priorities 1-3, placeholder structure for variable justifications, scripts → test → integrate approach, continuous log updates]*
+
+---
+
 ### User Prompt 59 [PYTHON]:
 
 Calculate Variance Inflation Factor (VIF) for all predictors in model m4 to check for multicollinearity, addressing the Kaggle OLS reference in CLAUDE.md and Codex's recommendation.
