@@ -336,9 +336,36 @@ Created clean Python-focused assignment document (eD_submission_main.qmd):
 
 ---
 
-### Step One: Data Description (Prompts 24-30)
+### Step One: Beginning the Assignment
 
-**Prompt 24 [PYTHON]:**
+**Prompt 24:**
+Let us begin the assignment in earnest now based on everything we have discussed up until this point and the reference materials I have provided. Let's start with step one first. Think step by step.
+
+**Result:**
+- Created comprehensive Step One plan with 7 prompts (25-31)
+- Plan covered: data loading, summary statistics, SalePrice distribution, predictor distributions, relationships, correlations, missing data
+- User interrupted with important clarification question
+
+---
+
+**Prompt 25:**
+Are we also accounting for the information from last years assignments that i provided in @lastSemest_eD_Notes.txt ?
+
+**Result:**
+- **Critical revision to plan:** Updated all Step One prompts to EXPLICITLY incorporate professor's specific feedback
+- Each interpretation section now references professor's exact observations:
+  - Mansion outliers requiring removal
+  - Log transformation needs (SalePrice, OverallQual, YearBuilt)
+  - Specific patterns to identify (nonlinear, heteroscedastic, correlation at low end)
+  - Location mediating effects warning
+  - Multiple imputation requirement
+- Plan approved and work began
+
+---
+
+### Step One: Data Description (Prompts 26-32)
+
+**Prompt 26 [PYTHON]:**
 Load the Ames Housing dataset using pandas and show me the structure and dimensions of the data.
 
 **Result:**
@@ -350,7 +377,7 @@ Load the Ames Housing dataset using pandas and show me the structure and dimensi
 
 ---
 
-**Prompt 25 [PYTHON]:**
+**Prompt 27 [PYTHON]:**
 Generate summary statistics for all variables in the dataset using pandas.
 
 **Result:**
@@ -360,7 +387,7 @@ Generate summary statistics for all variables in the dataset using pandas.
 
 ---
 
-**Prompt 26 [PYTHON]:**
+**Prompt 28 [PYTHON]:**
 Show me the distribution of SalePrice with a histogram and boxplot to identify outliers. Calculate the 95th percentile threshold.
 
 **Result:**
@@ -375,7 +402,7 @@ Show me the distribution of SalePrice with a histogram and boxplot to identify o
 
 ---
 
-**Prompt 27 [PYTHON]:**
+**Prompt 29 [PYTHON]:**
 Show me histograms of the key predictor variables: GrLivArea, OverallQual, YearBuilt, and TotalBsmtSF.
 
 **Result:**
@@ -388,7 +415,7 @@ Show me histograms of the key predictor variables: GrLivArea, OverallQual, YearB
 
 ---
 
-**Prompt 28 [PYTHON]:**
+**Prompt 30 [PYTHON]:**
 Create scatter plots showing the relationship between SalePrice and each of the key predictor variables.
 
 **Result:**
@@ -401,7 +428,7 @@ Create scatter plots showing the relationship between SalePrice and each of the 
 
 ---
 
-**Prompt 29 [PYTHON]:**
+**Prompt 31 [PYTHON]:**
 Calculate the correlation matrix for numeric variables and show the variables most strongly correlated with SalePrice.
 
 **Result:**
@@ -416,7 +443,7 @@ Calculate the correlation matrix for numeric variables and show the variables mo
 
 ---
 
-**Prompt 30 [PYTHON]:**
+**Prompt 32 [PYTHON]:**
 Identify variables with missing data and quantify the extent of missingness in the dataset.
 
 **Result:**
@@ -439,7 +466,84 @@ Synthesized all findings with explicit references to professor's observations:
 - Multiple imputation strategy
 - Transition to Step Two with 80-90% R² target
 
-**Status:** Step One complete with 7 prompts, each with code + written interpretation referencing professor's feedback throughout.
+**Status:** Step One complete with 7 prompts (26-32), each with code + written interpretation referencing professor's feedback throughout.
+
+---
+
+**Prompt 33 [PYTHON]:**
+I have uploaded a pdf of the medium web page that can't be fetched automatically @"Tackling the Ames Housing Dataset _ by Michael May _ Medium.pdf" Please use this for reference and update the system prompt
+
+**Result:**
+Updated CLAUDE.md with detailed information from Michael May's Medium article:
+- Added comprehensive breakdown of his GradientBoostingRegressor approach
+- Documented his feature engineering strategies (totalSF, finishedSF, qualitySF, total_bath)
+- Noted key insights: 54% categorical features, building block variables, right-skewed distribution
+- Included his preprocessing approach (drop low-coverage columns, SimpleImputer, OneHotEncoder, StandardScaler)
+- Final RMSE: 29,932.58
+- Note: Tree-based ML approach differs from our linear regression + transformations approach
+- Provides alternative perspective on Ames Housing analysis
+
+**Key Difference from Our Approach:**
+- Medium article: Machine learning with GradientBoostingRegressor, feature engineering focus
+- Our approach: Linear regression with statistical transformations (log transforms), diagnostic plots, meeting professor's 80-90% R² targets
+
+Both are valid approaches to the same dataset, demonstrating different analytical methodologies.
+
+---
+
+**Prompt 34:**
+I am concerned that not all of my user prompts are being added to @prompts_log.md. For instance, I don't see "**User:** Are we also accounting for the information from last years assignments that i provided in @lastSemest_eD_Notes.txt ?" or "**User:** Let us begin the assignment in earnest now based on everything we have discussed up until this point and the reference materials I have provided. Let's start with step one first. Think step by step." from my @conversation_log.md in my @prompts_log.md.
+
+**Result:**
+- **User was absolutely correct** - those important prompts were missing from prompts_log.md
+- Updated prompts_log.md to include ALL user prompts, including:
+  - Prompt 24: "Let us begin the assignment..." (assignment initiation)
+  - Prompt 25: "Are we also accounting for..." (critical clarification that changed approach)
+- Renumbered all subsequent prompts:
+  - Data analysis prompts now numbered 26-32 (previously 24-30)
+  - Medium article prompt now numbered 33 (previously 31)
+  - This prompt is 34
+- **Lesson learned:** Every user message that influences the work should be logged as a prompt, even clarification questions
+- **Academic requirement:** Complete documentation of ALL prompts for assignment evaluation
+
+---
+
+**Prompt 35:**
+I want to ignore @"Tackling the Ames Housing Dataset _ by Michael May _ Medium.pdf" since it is not in line with our other external resources.
+
+**Result:**
+- Removed Medium article reference from CLAUDE.md External Python Examples section
+- **Rationale for removal:**
+  - Medium article uses **GradientBoostingRegressor** (tree-based machine learning)
+  - Assignment requires **linear regression** with statsmodels/R
+  - Different methodology: feature engineering + ML vs. transformations + diagnostics
+  - Professor's requirements: 4 diagnostic plots, R² interpretation, variable justification (incompatible with tree-based models)
+  - Could confuse approach rather than help
+- **Remaining external resources (both aligned with assignment):**
+  1. Scikit-learn MOOC: data exploration, preprocessing pipelines
+  2. LearnPython: pandas/seaborn statistical analysis workflow
+- Updated CLAUDE.md note: "Both resources focus on statistical analysis and visualization approaches compatible with the assignment's linear regression requirements"
+- **User's critical thinking:** Evaluating whether resources actually support assignment goals - excellent prompt engineering practice
+
+---
+
+**Prompt 36:**
+Ok let's ignore @"Ames Housing Price Prediction — Complete ML Project with Python _ by Kamski John _ Medium.pdf"
+
+**Result:**
+- Decided NOT to add Kamski John's Medium article to external resources
+- **Rationale for exclusion:**
+  - While better than previous Medium article (uses Ridge regression, log transforms, Q-Q plots)
+  - **Different methodology:** Feature engineering approach (polynomial features, composite features) vs. professor's transformation approach (log transforms)
+  - **Missing critical elements:** Only 1 of 4 diagnostic plots shown, no R² interpretation or 80-90% targets discussed
+  - **Different tools:** sklearn Ridge instead of statsmodels OLS
+  - **Risk of confusion:** Could mislead toward feature engineering instead of statistical transformations
+  - StandardScaler normalization (not typical for statsmodels linear regression)
+- **Remaining external resources (both aligned):**
+  1. Scikit-learn MOOC: Data exploration and preprocessing techniques
+  2. LearnPython: Statistical analysis workflow with pandas/seaborn
+- Both resources support assignment without introducing incompatible methodologies
+- **User's critical evaluation:** Second resource evaluated and rejected - demonstrates strong discernment in aligning materials with assignment requirements
 
 ---
 

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Lucas McGill">
-<meta name="dcterms.date" content="2025-11-12">
+<meta name="dcterms.date" content="2025-11-13">
 
 <title>Ames Housing Dataset Regression Analysis</title>
 <style>
@@ -2249,7 +2249,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 12, 2025</p>
+      <p class="date">November 13, 2025</p>
     </div>
   </div>
   
@@ -2273,7 +2273,7 @@ vertical-align: -.125em;
 <section id="data-loading-and-initial-exploration" class="level3">
 <h3 class="anchored" data-anchor-id="data-loading-and-initial-exploration">Data Loading and Initial Exploration</h3>
 <p><em>Prompt 24 [PYTHON]: Load the Ames Housing dataset using pandas and show me the structure and dimensions of the data.</em></p>
-<div id="ab468d03" class="cell" data-execution_count="1">
+<div id="0f87d5a5" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -2422,7 +2422,7 @@ memory usage: 1.8+ MB</code></pre>
 <section id="summary-statistics" class="level3">
 <h3 class="anchored" data-anchor-id="summary-statistics">Summary Statistics</h3>
 <p><em>Prompt 25 [PYTHON]: Generate summary statistics for all variables in the dataset using pandas.</em></p>
-<div id="817bf028" class="cell" data-execution_count="2">
+<div id="ab2eb2e5" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary statistics for numeric variables</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Summary statistics for numeric variables:&quot;</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(housing.describe())</span>
@@ -2539,7 +2539,7 @@ max         NaN            NaN  625000.000000
 <section id="exploring-the-response-variable-sale-price" class="level3">
 <h3 class="anchored" data-anchor-id="exploring-the-response-variable-sale-price">Exploring the Response Variable: Sale Price</h3>
 <p><em>Prompt 26 [PYTHON]: Show me the distribution of SalePrice with a histogram and boxplot to identify outliers. Calculate the 95th percentile threshold.</em></p>
-<div id="061822f6" class="cell" data-execution_count="3">
+<div id="3fa2b9c2" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create figure with subplots</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">6</span>))</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2593,7 +2593,7 @@ Percentage of outliers: 5.0%</code></pre>
 <section id="key-predictor-variable-distributions" class="level3">
 <h3 class="anchored" data-anchor-id="key-predictor-variable-distributions">Key Predictor Variable Distributions</h3>
 <p><em>Prompt 27 [PYTHON]: Show me histograms of the key predictor variables: GrLivArea, OverallQual, YearBuilt, and TotalBsmtSF.</em></p>
-<div id="0d868ea0" class="cell" data-execution_count="4">
+<div id="9dee7daa" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create 2x2 subplot for key predictors</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">10</span>))</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2661,7 +2661,7 @@ max    3820.000000    10.000000  2010.000000  3206.000000</code></pre>
 <section id="relationships-between-predictors-and-sale-price" class="level3">
 <h3 class="anchored" data-anchor-id="relationships-between-predictors-and-sale-price">Relationships Between Predictors and Sale Price</h3>
 <p><em>Prompt 28 [PYTHON]: Create scatter plots showing the relationship between SalePrice and each of the key predictor variables.</em></p>
-<div id="822acc8b" class="cell" data-execution_count="5">
+<div id="cbd0c85b" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create 2x2 subplot for relationships with SalePrice</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">10</span>))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2720,7 +2720,7 @@ max    3820.000000    10.000000  2010.000000  3206.000000</code></pre>
 <section id="correlation-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="correlation-analysis">Correlation Analysis</h3>
 <p><em>Prompt 29 [PYTHON]: Calculate the correlation matrix for numeric variables and show the variables most strongly correlated with SalePrice.</em></p>
-<div id="62cd20a4" class="cell" data-execution_count="6">
+<div id="4856d299" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate correlation matrix for numeric variables only</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>numeric_cols <span class="op">=</span> housing.select_dtypes(include<span class="op">=</span>[np.number]).columns</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="op">=</span> housing[numeric_cols].corr()</span>
@@ -2768,7 +2768,7 @@ Values above 0.7 are generally considered strong correlations</code></pre>
 <section id="missing-data-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="missing-data-analysis">Missing Data Analysis</h3>
 <p><em>Prompt 30 [PYTHON]: Identify variables with missing data and quantify the extent of missingness in the dataset.</em></p>
-<div id="d3ad2ef1" class="cell" data-execution_count="7">
+<div id="929a2de9" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Count missing values for each variable</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>missing_counts <span class="op">=</span> housing.isnull().<span class="bu">sum</span>()</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>

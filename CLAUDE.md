@@ -129,9 +129,18 @@ install.packages(c("ggplot2", "viridis", "scales", "patchwork"))
 - When using Python: access with bracket notation like `housing['1stFlrSF']`
 
 **External Python Examples:**
-- [Scikit-learn MOOC: Ames Housing](https://inria.github.io/scikit-learn-mooc/python_scripts/datasets_ames_housing.html) - Data exploration, handling mixed types, missing value imputation with SimpleImputer, preprocessing pipelines
-- [LearnPython: Data Analysis Example](https://learnpython.com/blog/python-data-analysis-example/) - Four-step workflow (import, clean, explore, interpret), pandas/numpy/seaborn basics, identifying key features
-- [Medium: Tackling Ames Housing](https://medium.com/@mskmay66/tackling-the-ames-housing-dataset-c63e7947908a) - Comprehensive analysis approach (manual access only, server blocks automated fetching)
+
+1. **[Scikit-learn MOOC: Ames Housing](https://inria.github.io/scikit-learn-mooc/python_scripts/datasets_ames_housing.html)**
+   - Data exploration, handling mixed types
+   - Missing value imputation with SimpleImputer
+   - Preprocessing pipelines with make_column_transformer
+
+2. **[LearnPython: Data Analysis Example](https://learnpython.com/blog/python-data-analysis-example/)**
+   - Four-step workflow: import → clean → explore → interpret
+   - pandas/numpy/seaborn basics
+   - Identifying key features affecting price
+
+**Note:** Both resources focus on statistical analysis and visualization approaches compatible with the assignment's linear regression requirements.
 
 ## Claude Skills Integration
 
