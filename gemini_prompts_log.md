@@ -15,7 +15,7 @@ My operating system is: darwin
 I'm currently working in the directory: /Users/jankmajesty/Desktop/Archives/Academic/Coursework/currentCourses/promptEngineering/eD
 Here is the folder structure of the current working directories:
 
-Showing up to 200 items (files + folders). Folders or files indicated with ... contain more items not shown, were ignored, or the display limit (200 items) was reached.
+Showing up to 200 items (files + folders). Folders or files indicated with ... contain more items not shown, were ignored, or the display limit (200 items) reached.
 
 /Users/jankmajesty/Desktop/Archives/Academic/Coursework/currentCourses/promptEngineering/eD/
 ├───amesHousing2011.csv
@@ -135,3 +135,6 @@ Will you explain residuals again?
 
 ### Prompt 19:
 what are p-values?Will you explain fitted values?
+
+### Prompt 20:
+Will you explain how removing the outliers in step two effects the diagnostic plots in step three?
