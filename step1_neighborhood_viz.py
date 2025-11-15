@@ -32,7 +32,8 @@ axes[0].set_ylabel('Sale Price ($)', fontsize=11)
 axes[0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
 axes[0].grid(axis='y', alpha=0.3)
 
-# Plot 2: Scatterplot colored by top 6 neighborhoods
+# Plot 2: Scatterplot colored by 6 most common neighborhoods
+# "Top 6" = neighborhoods with most observations (not most expensive)
 top_neighborhoods = housing['Neighborhood'].value_counts().head(6).index
 housing_top = housing[housing['Neighborhood'].isin(top_neighborhoods)]
 
@@ -46,9 +47,9 @@ for i, neighborhood in enumerate(top_neighborhoods):
 
 axes[1].set_xlabel('Above-Grade Living Area (sq ft)', fontsize=11)
 axes[1].set_ylabel('Sale Price ($)', fontsize=11)
-axes[1].set_title('Living Area vs Price by Top 6 Neighborhoods',
+axes[1].set_title('Living Area vs Price: 6 Most Common Neighborhoods',
                  fontsize=13, fontweight='bold')
-axes[1].legend(title='Neighborhood', fontsize=9, title_fontsize=10)
+axes[1].legend(title='Neighborhood (by sample size)', fontsize=9, title_fontsize=10)
 axes[1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
 axes[1].grid(alpha=0.3)
 
@@ -59,6 +60,10 @@ plt.show()
 print("\n" + "="*70)
 print("NEIGHBORHOOD PRICE VARIATION ANALYSIS")
 print("="*70)
+
+print("\nNote: The scatterplot shows the 6 MOST COMMON neighborhoods (by sample size),")
+print("not the 6 most expensive. This ensures each neighborhood has enough observations")
+print("to display meaningful price-area relationships.")
 
 # Summary statistics by neighborhood
 neighborhood_stats = housing.groupby('Neighborhood')['SalePrice'].agg([

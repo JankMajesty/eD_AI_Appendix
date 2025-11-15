@@ -108,3 +108,51 @@ will you update codex_conersation_log.md and codex_prompts_log.md
 
 ### Codex Response 9:
 Appended Prompts 8–9 and their summaries to both Codex log files so the latest review notes are captured for future agents.
+
+### User Prompt 10:
+I made a mistake. I need you to update our prompts in codex_conersation_log.md and codex_prompts_log.md then make the step two updates. Think step by step.
+
+### Codex Response 10:
+Documented Prompt 10 in both Codex logs and will proceed to revise Step Two (imputation narrative + ten-variable justification) once logging is fully synchronized.
+
+### User Prompt 11:
+will you update our codex_conersation_log.md and codex_prompts_log.md ?
+
+### Codex Response 11:
+Logged Prompt 11 in both Codex tracking files and confirmed all Codex-specific interactions remain synchronized with the repository’s documentation.
+
+### User Prompt 12:
+When I render with command + shift + k in cursor, it hangs and I receive this error (ConnectionReset: os error 54 plus stack trace).
+
+### Codex Response 12:
+Explained that the Quarto preview connection was dropping and provided troubleshooting steps: render from terminal with `--execute-debug`, point Quarto to `.venv/bin/python`, kill stale preview processes, freeze long-running chunks, and rely on terminal renders if Cursor keeps timing out.
+
+### User Prompt 13:
+I'm receiving this error when I render in terminal.
+
+### Codex Response 13:
+Requested the exact terminal command and full traceback so the failure point could be diagnosed.
+
+### User Prompt 14:
+Supplied the KeyError “YearRemod/Add” traceback from the terminal render.
+
+### Codex Response 14:
+Identified that statsmodels names the coefficient `Q("YearRemod/Add")`, updated the Step Two justification chunk to map the variable to the quoted parameter before reading its p-value, and confirmed Quarto renders proceed after the fix.
+
+### User Prompt 15:
+It seems like you neglected to log our quarto debugging prompts in codex_conersation_log.md and codex_prompts_log.md
+
+### Codex Response 15:
+Added Prompts 12–15 and their summaries to both Codex log files so the debugging exchange is fully documented.
+
+### User Prompt 16:
+We made a mistake. The prompts and responses in this chat should be in codex_conersation_log.md. My prompts should be in codex_prompts_log.md. The other logs are for my chats with Claude.
+
+### Codex Response 16:
+Acknowledged the logging scope clarification and confirmed that all future prompts/responses from this Codex session will continue to be recorded exclusively in `codex_prompts_log.md` and `codex_conersation_log.md` so they remain separate from the Claude transcripts.
+
+### User Prompt 17:
+Will you read eD.qmd and assignmentClarity.md and make sure assignmentClarity.md is accurate based off of eD.qmd ?
+
+### Codex Response 17:
+Reviewed both files and confirmed assignmentClarity.md mirrors the requirements from eD.qmd (it only adds extra explanatory detail), so no edits were necessary.

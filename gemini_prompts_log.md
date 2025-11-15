@@ -1,4 +1,3 @@
-
 # Gemini Prompts Log
 
 ## Initial Setup and Clarification
@@ -100,3 +99,39 @@ I still don't see the update to the gemini system prompt
 
 ### Prompt 7:
 I need you to add to the @GEMINI.md system prompt that since you are gemini you will log conversation @gemini_conversation_log.md and prompts @gemini_prompts_log.md
+
+### Prompt 8:
+Will you explain what a log transformation is for someone who is unfamiliar with data science and update our @gemini_conversation_log.md and @gemini_prompts_log.md ?
+
+### Prompt 9:
+Will you explain heteroscedasticity for someone unfamiliar with data science and update @gemini_conversation_log.md and @gemini_prompts_log.md
+
+### Prompt 10:
+Will you explain multicollinearity as it pertains to my @eD_submission_main.qmd and update @gemini_conversation_log.md and @gemini_prompts_log.md ?
+
+### Prompt 11:
+What is "Residuals vs Fitted" in my graphs in @eD_submission_main.qmd and update @gemini_conversation_log.md and @gemini_prompts_log.md .
+
+### Prompt 12:
+What are "pairwise correlations?" and update @gemini_conversation_log.md and @gemini_prompts_log.md .
+
+### Prompt 13:
+What is lasso regression? and update @gemini_conversation_log.md and @gemini_prompts_log.md
+
+### Prompt 14:
+What is variance inflation factor? and update @gemini_conversation_log.md and @gemini_prompts_log.md
+
+### Prompt 15:
+What is a Q-Q plot? and update @gemini_conversation_log.md and @gemini_prompts_log.md
+
+### Prompt 16:
+System: Please continue.
+
+### Prompt 17:
+Will you explain why my Q-Q plot becomes more normalized further along the theoretical quantiles?
+
+### Prompt 18:
+Will you explain residuals again?
+
+### Prompt 19:
+what are p-values?Will you explain fitted values?

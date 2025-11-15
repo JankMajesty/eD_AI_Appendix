@@ -1338,5 +1338,92 @@ Enhance Step One Summary to explicitly connect EDA findings with preprocessing c
 
 **Result:** Enhanced lines 479-498 in eD_submission_main.qmd. Added 7-row mapping table connecting each EDA finding to specific preprocessing action with statistical justification. Added narrative flow diagram (Step One→Two→Three→Four). Emphasized empirical grounding principle per professor's feedback. Codex Priority 3.2 complete. ALL 10 CODEX PRIORITIES ADDRESSED (59-68).
 
-All 68 prompts logged.
+---
+
+**Prompt 69:**
+How are we calculating the "top 6 neighborhoods" in "## Neighborhood Price Variation"?
+
+**Result:** Clarified that "top 6" means 6 MOST COMMON neighborhoods by sample size (using `.value_counts().head(6)`), not 6 most expensive. Updated both step1_neighborhood_viz.py and eD_submission_main.qmd:
+- Changed plot title from "Top 6 Neighborhoods" → "6 Most Common Neighborhoods"
+- Changed legend title from "Neighborhood" → "Neighborhood (by sample size)"
+- Added code comment explaining selection criterion
+- Added explanatory note in script output
+- Updated interpretation text to clarify "showing the 6 most common neighborhoods by sample size"
+- Rationale: Most common neighborhoods have enough observations to display meaningful price-area relationships
+
+All 69 prompts logged.
+
+---
+
+**Prompt 70:**
+
+What is EDA in the context of this document? Answer this and then update our @conversation_log.md and @prompts_log.md
+
+**Result:**
+
+**EDA = Exploratory Data Analysis**
+
+In the assignment context, EDA refers to Step One (Data Description) - the initial investigation phase including:
+- Dataset structure examination (dimensions, types)
+- Summary statistics (means, medians, ranges)
+- Visualizations (histograms, boxplots, scatterplots)
+- Relationship exploration (correlations)
+- Data quality assessment (outliers, missing values)
+- Pattern detection informing modeling decisions
+
+**Why it matters:**
+Prompt 68 (Codex Priority 3.2) enhanced Step One Summary to connect EDA findings with preprocessing choices, creating empirical chain of reasoning:
+- EDA finding: SalePrice right-skewed → Preprocessing: log_SalePrice
+- EDA finding: Mansion outliers >$334K → Preprocessing: Remove top 5%
+- EDA finding: OverallQual nonlinear → Preprocessing: log_OverallQual
+- EDA finding: YearBuilt heteroscedastic → Preprocessing: log_YearBuilt
+- EDA finding: Location mediates variables → Preprocessing: Test Neighborhood in m3
+
+Professor emphasized modeling decisions must be empirically grounded in EDA, not arbitrary - hence connecting Step One (EDA) to Step Two (preprocessing/modeling) was critical.
+
+All 70 prompts logged.
+
+---
+
+**Prompt 71:**
+
+Will you explain the "log(sale Price)" "log(Overal Quality)" and "log(Year Built)" numbers on the x axes in the data transformations graph in step two and what they refer to? Why are they much smaller than the x axes in the unprocessed data? and update @conversation_log.md and @prompts_log.md.
+
+**Result:**
+
+Explained logarithmic transformation and why log-scale values are smaller than original values.
+
+**Key Concepts:**
+- **Logarithm definition:** log(x) asks "what power of e (≈2.718) gives x?"
+- **Compression principle:** log of a number is almost always smaller than the original (for numbers > 2.718)
+
+**Three Variables Explained:**
+
+1. **log(SalePrice):** Original $12,789-$334,000 → Log scale 9.46-12.72
+   - log($163,000) ≈ 12.00 because e^12.00 ≈ 163,000
+
+2. **log(OverallQual):** Original 1-10 scale → Log scale 0-2.30
+   - log(1) = 0, log(5) ≈ 1.61, log(10) ≈ 2.30
+
+3. **log(YearBuilt):** Original 1872-2010 → Log scale 7.53-7.61
+   - Very compressed (0.08 unit range) because years are similar magnitude
+   - log(1872) ≈ 7.53, log(2010) ≈ 7.61
+
+**Why Logarithms Help Regression:**
+1. **Compress extreme values:** Mansions ($625K) vs starters ($35K) = 18x difference → log scale only 2.89 units
+2. **Linearize nonlinear relationships:** Exponential quality-price relationship becomes linear
+3. **Normalize distributions:** Right-skewed SalePrice becomes symmetric (bell-shaped)
+
+**Reading the Graph:**
+- X-axis values are in "log units," not original units
+- Example: log_SalePrice = 12 means approximately $163,000 (not $12)
+- Transformation creates better statistical properties for regression
+
+**Archival analogy:** Like Dewey Decimal Classification—books with 50-5,000 pages all mapped to 000-999 range (compressed scale for organization).
+
+All 71 prompts logged.
+
+---
+
+
 

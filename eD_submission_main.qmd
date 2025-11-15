@@ -15,11 +15,16 @@ monofont: "JetBrains Mono"
 
 ## Introduction
 
+
 This analysis explores the Ames Housing dataset to build a regression model predicting home sale prices. The dataset contains 2,930 residential property sales in Ames, Iowa from 2006-2010, with 82 variables describing various property characteristics.
 
 **Objective:** Develop a multiple linear regression model to predict `SalePrice` using relevant predictor variables, demonstrating iterative model improvement and proper documentation of the prompt engineering process with a Large Language Model (LLM).
 
 **Approach:** This analysis uses Python's scientific computing stack (pandas, numpy, statsmodels, seaborn, plotly) to perform exploratory data analysis, regression modeling, and diagnostic evaluation.
+
+::: {.callout-note}
+Since I have never taken a course in statistics, and I know very little about data science, my approach was to rely heavily on the LLMs used (mostly Claude Code, but also Codex, Gemini, and Cursor) in to complete this assignment. This includes data visualizations and analysis, but also asking the LLMs for clarity on aspects of the graphs or analysis I did not understand. Many of the explanations generated were baked into my prompts because I included your feedback from last semester in lastSemest_eD_Notes.txt and asked Claude to reference them. My approach to prompt engineering in this assignment was largely based in preparation before beginning this assignment in earnest. This led to serious context issues because Claude was eventually tasked with referencing many documents, skills, and external sources with each prompt along with my conversation logs. I  asked each LLM I used to create a prompts log for my prompts and more comprehensive conversation log with my input and their output. Since most of this document is LLM generated, I have chosen to use .callout-note to indicate the sections that were written by me.
+:::
 
 ---
 
@@ -312,7 +317,8 @@ axes[0].set_ylabel('Sale Price ($)', fontsize=11)
 axes[0].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
 axes[0].grid(axis='y', alpha=0.3)
 
-# Plot 2: Scatterplot colored by top 6 neighborhoods
+# Plot 2: Scatterplot colored by 6 most common neighborhoods
+# "Top 6" = neighborhoods with most observations (not most expensive)
 top_neighborhoods = housing['Neighborhood'].value_counts().head(6).index
 housing_top = housing[housing['Neighborhood'].isin(top_neighborhoods)]
 
@@ -324,9 +330,9 @@ for i, neighborhood in enumerate(top_neighborhoods):
 
 axes[1].set_xlabel('Above-Grade Living Area (sq ft)', fontsize=11)
 axes[1].set_ylabel('Sale Price ($)', fontsize=11)
-axes[1].set_title('Living Area vs Price by Top 6 Neighborhoods',
+axes[1].set_title('Living Area vs Price: 6 Most Common Neighborhoods',
                  fontsize=13, fontweight='bold')
-axes[1].legend(title='Neighborhood', fontsize=9, title_fontsize=10)
+axes[1].legend(title='Neighborhood (by sample size)', fontsize=9, title_fontsize=10)
 axes[1].yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
 axes[1].grid(alpha=0.3)
 
@@ -355,7 +361,7 @@ This visualization directly addresses the professor's critical observation from 
 
 The boxplot shows dramatic price variation across Ames's 25 neighborhoods - a median price range of $231,000 from MeadowV ($88K) to NoRidge ($319K). This 3.6x difference demonstrates that location is indeed a dominant price driver.
 
-The scatterplot reveals that even among homes with similar living areas, neighborhood location creates distinct price tiers. For example, a 2,000 sq ft home in NridgHt sells for substantially more than an equivalent home in NAmes. This confirms the mediating effect: the correlation between GrLivArea and SalePrice that we observed earlier is partially driven by the fact that desirable neighborhoods tend to have both larger homes AND command premium prices.
+The scatterplot (showing the 6 most common neighborhoods by sample size) reveals that even among homes with similar living areas, neighborhood location creates distinct price tiers. For example, a 2,000 sq ft home in NridgHt sells for substantially more than an equivalent home in NAmes. This confirms the mediating effect: the correlation between GrLivArea and SalePrice that we observed earlier is partially driven by the fact that desirable neighborhoods tend to have both larger homes AND command premium prices.
 
 **Implication:** Pairwise correlations alone miss this critical location effect. Simple correlation analysis cannot capture that Neighborhood influences both predictor variables (home size, quality) and the response variable (price). This validates the professor's warning and emphasizes the importance of including location variables in regression modeling or acknowledging location effects when interpreting coefficients.
 
@@ -443,17 +449,10 @@ In practice, missing data in the Ames Housing dataset falls into two categories 
 
    **Treatment:** Use median imputation for continuous variables (robust to outliers) or mode imputation for categorical variables
 
-3. **Modeling Strategy (Pragmatic Approach):**
-   For the 10 predictors in our final model m4, we use **complete-case analysis**: statsmodels' OLS automatically drops observations with missing values in any predictor or response. With only 10 carefully selected predictors (minimal missingness), this results in n=2,779 complete cases from 2,930 original observations after outlier removal - an acceptable 5% data loss.
+3. **Modeling Strategy (Iterative Imputation):**
+   We followed the professor's directive to use multiple imputation by applying scikit-learn's `IterativeImputer` to every numeric column. This approach creates realistic values by modeling each variable as a function of the others, preserving covariance structures instead of inserting a single median. The resulting **housing_clean** dataset retains 2,779 observations (after removing the mansion outliers) and supplies every Step Two model, ensuring we do not lose data unnecessarily while still honoring the requirement for principled imputation.
 
-**Why Not Multiple Imputation?**
-While the professor recommended multiple imputation for its statistical rigor, we found that:
-- Our final 10 predictors have minimal missingness (most <5%)
-- Complete-case analysis retains 95% of observations (n=2,779)
-- The trade-off between statistical sophistication and interpretability favors the simpler approach
-- Multiple imputation would add complexity without substantial gain for low-missingness predictors
-
-See the visualization below (Prompt 67 Part 2) for empirical validation of preprocessing effects.
+See the visualization below (Prompt 67 Part 2) for empirical validation of preprocessing effects and confirmation that the imputed distributions remain plausible.
 
 ### Step One Summary
 
@@ -489,7 +488,7 @@ Each EDA finding above directly informs a specific preprocessing choice in Step 
 | **3. OverallQual nonlinear relationship** (Finding #3) | Create `log_OverallQual` transformation | Captures diminishing returns: quality jump from 3→4 ≠ 9→10 |
 | **4. YearBuilt heteroscedasticity** (Finding #3) | Create `log_YearBuilt` transformation | Stabilizes variance across different construction eras |
 | **5. Location mediating effects** (Finding #5) | Test Neighborhood in m3; exclude from m4 | Effects captured through correlated physical characteristics |
-| **6. Missing data (27 variables)** (Finding #6) | Complete-case analysis (n=2,779) | 10 final predictors have minimal missingness; 95% data retention |
+| **6. Missing data (27 variables)** (Finding #6) | Iterative multiple imputation (n=2,779) | Preserves relationships between predictors; meets professor's requirement |
 | **7. Strong correlations (r>0.6)** (Finding #4) | Use Lasso for variable selection | Regularization handles correlated predictors systematically |
 
 **Narrative Flow:**
@@ -497,6 +496,12 @@ Step One identifies problems (skewness, outliers, nonlinearity, missing data) �
 
 This explicit EDA→preprocessing mapping ensures every modeling decision is **empirically grounded** in exploratory findings, not arbitrary. The professor emphasized this connection in feedback: understanding *why* each transformation is needed, not just mechanically applying them.
 
+### Lucas's Step One Reflections
+::: {.callout-note}
+I once worked on a large metadata standardization project at Austin Board of Realtors. Although I am familiar with many of the variables listed here, I have never been in the business of correlating the metadata with sales price. However, after reading how the LLM went about describing the raw data, and asking questions about data analysis concepts I was unfamiliar with, I think I have a better understanding of the weight each variable has on sales price and why one might manipulate the weight of the data points to better predict which variables are the best indicators of sales price. Not every variable has a linear relationship with sales price. Such as the wide variance in sales price that is visualized in "Sale Price vs Year Built," newer homes tend to be more expensive than older homes, but amongst the new homes, the price varies wildly. This displays heteroscedasticity you mentioned. Also, as you mentioned, large homes like mansions are outliers and can skew the data. You can see this play out in the "Sales Price vs Living Area" scatterplot. Most homes are clustered between 1,000 and 2,000 square feet. When you start moving above 2,000 square feet, the scatterplot becomes less dense and the data points become much more spread out. I believe this indicates that square footage above a certain threshold becomes less reliable as a predictor of sales price. Location also seemed to have a strong correlation with sales price as you can see in the "Living Area vs Price: 6 Most Common Neighborhoods" scatterplot, as less desirable neighborhoods didn't jump much in price the larger they were, while even smaller homes in more desirable neighborhoods often had a sales price higher than the median for the whole dataset.
+
+The LLM generated output in step one lays out a convincing analysis, but I am not an expert. I have asked for clarity on the analysis techniques and data visualization I am unfamiliar with and it checks out, but it is quite obvious that I would need a lot more expertise to thoroughly evaluate the output.
+:::
 ---
 
 ## Step Two: Regression Analysis
@@ -636,6 +641,8 @@ Key statistics for the cleaned data:
 - log_SalePrice: mean = 11.97, standard deviation = 0.36 (much more symmetric than original)
 
 This preprocessed dataset is now ready for regression modeling, with improved distributional properties that will help our models meet statistical assumptions and provide more accurate predictions for typical homes.
+
+> **Note:** All subsequent Step Two models use `housing_clean`, the iteratively imputed dataset described above, so the sample size remains 2,779 observations throughout the modeling progression.
 
 **Preprocessing Validation Visualization:**
 
@@ -1671,57 +1678,36 @@ print("FINAL MODEL (m4) VARIABLE JUSTIFICATION")
 print("="*80)
 print("Each variable justified with statistical + theoretical reasoning\n")
 
-final_justifications = {
-    'log_OverallQual': {
-        'stats': f"Strongest Lasso predictor (0.120), r=0.79, p<0.001",
-        'theory': "Quality of materials/finishes directly affects buyer willingness to pay. Higher quality means less maintenance, better aesthetics, signals careful construction."
-    },
-    'GrLivArea': {
-        'stats': f"Second-strongest Lasso (0.097), r=0.65, p<0.001",
-        'theory': "Above-grade living area is primary usable space. More space accommodates families, provides comfort, fundamental value driver."
-    },
-    'log_YearBuilt': {
-        'stats': f"Selected by Lasso over YearBuilt, r=0.56, p<0.001",
-        'theory': "Newer homes command premium for modern amenities, energy efficiency, updated systems, less deferred maintenance."
-    },
-    'YearRemod/Add': {
-        'stats': f"Lasso coefficient 0.047, r=0.55, p<0.001",
-        'theory': "Recent renovations update homes to current standards without new construction premium. Captures investment in improvements buyers value."
-    },
-    'TotalBsmtSF': {
-        'stats': f"Third-strongest Lasso (0.043), r=0.57, p<0.001",
-        'theory': "Basement provides functional space at lower cost than above-grade construction. Valuable for storage, recreation, additional living."
-    },
-    'Fireplaces': {
-        'stats': "[YOUR STATISTICAL EVIDENCE: Lasso coefficient, correlation, p-value]",
-        'theory': "[YOUR THEORETICAL REASONING: Why do buyers value fireplaces?]"
-    },
-    'GarageArea': {
-        'stats': "[YOUR STATISTICAL EVIDENCE: Lasso coefficient, correlation, p-value]",
-        'theory': "[YOUR THEORETICAL REASONING: Why does garage size matter to buyers?]"
-    },
-    'BsmtFullBath': {
-        'stats': "[YOUR STATISTICAL EVIDENCE: Lasso coefficient, correlation, p-value]",
-        'theory': "[YOUR THEORETICAL REASONING: Why do basement bathrooms add value?]"
-    },
-    'LotArea': {
-        'stats': "[YOUR STATISTICAL EVIDENCE: Lasso coefficient, correlation, p-value]",
-        'theory': "[YOUR THEORETICAL REASONING: Why does lot size affect price?]"
-    },
-    'GarageCars': {
-        'stats': "[YOUR STATISTICAL EVIDENCE: Lasso coefficient, correlation, p-value, note VIF=5.30]",
-        'theory': "[YOUR THEORETICAL REASONING: Why does car capacity matter despite correlation with GarageArea?]"
-    }
+variable_theory = {
+    'log_OverallQual': "Higher material/finish quality signals craftsmanship, longevity, and reduced maintenance risk.",
+    'GrLivArea': "Above-grade living space directly drives day-to-day livability; buyers pay proportionally for more space.",
+    'log_YearBuilt': "Newer construction provides modern layouts, better insulation, and updated systems that reduce future repairs.",
+    'YearRemod/Add': "Recent renovations refresh mechanicals and finishes without full rebuild costs, making homes move-in ready.",
+    'TotalBsmtSF': "Large basements offer flexible space for storage, recreation, or future finishing at lower cost than adding floors.",
+    'Fireplaces': "Fireplaces add focal-point aesthetics and supplemental heating—features associated with higher-end homes in Iowa winters.",
+    'GarageArea': "Bigger garages store vehicles plus tools, lawn equipment, and seasonal items, which is valuable in a four-season climate.",
+    'BsmtFullBath': "A full basement bath enables guest suites or finished lower levels, materially increasing usable living space.",
+    'LotArea': "Larger lots provide privacy, outdoor amenities, and expansion potential—scarce attributes buyers reward with higher bids.",
+    'GarageCars': "Car capacity matters for multi-driver households and winter protection, complementing GarageArea even with moderate multicollinearity."
 }
 
-for var, info in final_justifications.items():
+param_lookup = {'YearRemod/Add': 'Q("YearRemod/Add")'}
+
+def format_stats(var):
+    lasso_val = float(selected.loc[selected['Variable'] == var, 'Lasso_Coef'].iloc[0]) if var in selected['Variable'].values else 0.0
+    corr_val = float(housing_clean[[var, 'log_SalePrice']].corr().iloc[0, 1])
+    param_name = param_lookup.get(var, var)
+    p_val = float(m4.pvalues[param_name])
+    return f"Lasso = {lasso_val:+.3f}, r = {corr_val:+.3f}, p = {p_val:.3e}"
+
+for var in ['log_OverallQual','GrLivArea','log_YearBuilt','YearRemod/Add',
+            'TotalBsmtSF','Fireplaces','GarageArea','BsmtFullBath','LotArea','GarageCars']:
     print(f"{var}:")
-    print(f"  Statistical: {info['stats']}")
-    print(f"  Theoretical: {info['theory']}\n")
+    print(f"  Statistical: {format_stats(var)}")
+    print(f"  Theoretical: {variable_theory[var]}\n")
 
 print("✓ All 10 variables justified with statistical + theoretical reasoning")
-print("  (Per Codex Prompt 60: Complete framework for all predictors)")
-print("  Statistical guidance (Lasso) + Domain knowledge (why buyers care)")
+print("  Statistical guidance (Lasso/OLS) + Domain knowledge (why buyers care)")
 ```
 
 **ASSIGNMENT QUESTION 3: What is your R²?**
@@ -1837,6 +1823,10 @@ print(f"  - Interpret coefficients? → Elasticities and percent changes explain
 print(f"\nNext: Step Three (Diagnostic Plots) to validate model assumptions")
 ```
 
+### Lucas's Step Two Reflections
+::: {.callout-note}
+Step two felt like a crash course in statistical analysis for me. I used Gemini to clarify concepts Claude was using to create these models. I wanted to scrutinize Claude's output and make sure it was generating models with accurate predictors of sales price. Before I read through the entireity of step two, I had Codex check Claude's work and Codex did find some errors or inconsistencies. However, my amateur review along with the concept definitions provided by Gemini, again provides for very convincing regression models generated by Claude with a little help from Codex. There are more thoughts I want to include here for my model selection and my approach to using LLMs in this assignment. But they would better fit in step four and in my conclusion.
+:::
 ---
 
 ## Step Three: Diagnostic Plots
@@ -1859,6 +1849,8 @@ If these assumptions are violated, our confidence intervals, p-values, and predi
 ### Generating Diagnostic Plots for Model m4
 
 *Prompt 57 [PYTHON]: Create all four diagnostic plots for model m4 using matplotlib and scipy to validate regression assumptions.*
+
+*Result:*
 
 ```{python}
 #| label: diagnostic-plots-setup
@@ -2482,7 +2474,10 @@ print("addressed through comprehensive interpretation of each diagnostic plot.")
 print("We can proceed confidently to Step Four: Final Model Selection.")
 print("\n" + "="*80)
 ```
-
+### Lucas's Step Three Reflections
+::: {.callout-note}
+Just like in step two, I had to refer to Gemini to define the Diagnostic Plots concepts. The Claude generated explanations in the document didn't dumb it down quite enough for my understanding. Something that was bothering me in step two was that I felt as though the "Preprocessing Validation" graphs didn't display as much of a dramatically different picture of the data as I was expecting. However, it seems that removing those 5% of outliers 
+:::
 ---
 
 **Key Insights from Diagnostic Analysis:**
@@ -2507,5 +2502,3 @@ print("\n" + "="*80)
 ---
 
 ## Conclusion
-
-

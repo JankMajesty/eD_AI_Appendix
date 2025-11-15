@@ -100,3 +100,52 @@ will you update codex_conersation_log.md and codex_prompts_log.md
 
 ---
 
+**Prompt 10:**
+I made a mistake. I need you to update our prompts in codex_conersation_log.md and codex_prompts_log.md then make the step two updates. Think step by step.
+
+---
+
+**Prompt 11:**
+will you update our codex_conersation_log.md and codex_prompts_log.md ?
+
+---
+
+**Prompt 12:**
+When I render with command + shift + k in cursor, it hangs and I receive this error:
+
+ERROR: ConnectionReset: Connection reset by peer (os error 54)
+
+Stack trace:
+    at async TcpConn.read (ext:deno_net/01_net.js:145:15)
+    ...
+
+---
+
+**Prompt 13:**
+I'm receiving this error when i render in terminal.
+
+---
+
+**Prompt 14:**
+KeyError: 'YearRemod/Add'
+
+The above exception was the direct cause of the following exception:
+
+[stack trace]
+
+---
+
+**Prompt 15:**
+It seems like you neglected to log our quarto debugging prompts in codex_conersation_log.md and codex_prompts_log.md
+
+---
+
+**Prompt 16:**
+We made a mistake. The prompts and responses in this chat should be in codex_conersation_log.md . My prompts should be in codex_prompts_log.md . The other logs are for my chats with Claude.
+
+---
+
+**Prompt 17:**
+Will you read eD.qmd and assignmentClarity.md and make sure assignmentClarity.md is accurate based off of eD.qmd ?
+
+---
